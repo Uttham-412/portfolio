@@ -9,6 +9,7 @@ import {
   type Variants,
 } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import TiltCard from "@/components/ui/TiltCard";
 import styles from "./About.module.css";
 
 const techStack = ["Python", "React", "PyTorch", "Node.js", "Docker"];
@@ -101,9 +102,10 @@ function StatCard({
   const { ref, display } = useAnimatedStat(target);
 
   return (
-    <motion.div
+    <TiltCard
       className={`${styles.glassCard} ${styles.statCard}`}
       variants={fadeUpVariants}
+      maxTilt={6}
     >
       <div className={styles.statIconWrap}>
         <span className={`material-symbols-outlined ${styles.statIcon}`}>
@@ -114,7 +116,7 @@ function StatCard({
         {display}
       </span>
       <p className={styles.statLabel}>{label}</p>
-    </motion.div>
+    </TiltCard>
   );
 }
 
@@ -165,7 +167,10 @@ export default function About() {
                 <h3 className={styles.sectionHeading}>Education</h3>
                 <div className={styles.sectionRule} />
               </div>
-              <div className={`${styles.glassCard} ${styles.educationCard}`}>
+              <TiltCard
+                className={`${styles.glassCard} ${styles.educationCard}`}
+                maxTilt={5}
+              >
                 <div className={styles.educationInner}>
                   <div className={styles.educationIcon}>
                     <span
@@ -189,13 +194,14 @@ export default function About() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             </motion.div>
           </div>
 
-          <motion.div
+          <TiltCard
             className={`${styles.glassCard} ${styles.techPanel}`}
             variants={fadeUpVariants}
+            maxTilt={5}
           >
             <div className={styles.techGlow}>
               <div className={styles.techGlowPrimary} />
@@ -236,7 +242,7 @@ export default function About() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </TiltCard>
         </motion.div>
 
         <motion.div

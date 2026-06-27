@@ -7,6 +7,8 @@ import {
   type Variants,
 } from "framer-motion";
 import Image from "next/image";
+import HeroCodeBackground from "@/components/HeroCodeBackground";
+import MagneticButton from "@/components/ui/MagneticButton";
 import styles from "./Hero.module.css";
 
 const PROFILE_IMAGE =
@@ -19,8 +21,8 @@ const contentVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      delayChildren: 0.2,
-      staggerChildren: 0.11,
+      delayChildren: 0.15,
+      staggerChildren: 0.1,
     },
   },
 };
@@ -28,13 +30,28 @@ const contentVariants: Variants = {
 const revealVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 22,
-    filter: "blur(6px)",
+    y: 24,
+    filter: "blur(8px)",
   },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
+    transition: {
+      duration: 0.9,
+      ease: EASE,
+    },
+  },
+};
+
+const lineRevealVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: "105%",
+  },
+  visible: {
+    opacity: 1,
+    y: "0%",
     transition: {
       duration: 0.85,
       ease: EASE,
@@ -45,15 +62,15 @@ const revealVariants: Variants = {
 const profileVariants: Variants = {
   hidden: {
     opacity: 0,
-    scale: 0.94,
-    y: 20,
+    scale: 0.92,
+    y: 28,
   },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
     transition: {
-      duration: 1,
+      duration: 1.05,
       ease: EASE,
     },
   },
@@ -62,33 +79,39 @@ const profileVariants: Variants = {
 const wordVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: "110%",
+    y: "115%",
+    rotateX: 28,
   },
   visible: (index: number) => ({
     opacity: 1,
     y: "0%",
+    rotateX: 0,
     transition: {
-      duration: 0.9,
+      duration: 0.95,
       ease: EASE,
-      delay: index * 0.08,
+      delay: index * 0.09,
     },
   }),
 };
 
 const actionsVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.75,
+      duration: 0.8,
       ease: EASE,
-      delay: 0.05,
     },
   },
 };
 
 const TITLE_WORDS = ["Uttham", "Poojary"];
+
+const DESCRIPTION_LINES = [
+  "Building intelligent software, AI-powered applications,",
+  "and scalable digital experiences with precision and architectural excellence.",
+];
 
 export default function Hero() {
   const prefersReducedMotion = useReducedMotion();
@@ -96,18 +119,42 @@ export default function Hero() {
   const floatTransition = prefersReducedMotion
     ? undefined
     : {
-        duration: 5.5,
+        duration: 7,
         repeat: Infinity,
         ease: "easeInOut" as const,
+      };
+
+  const orbitTransition = prefersReducedMotion
+    ? undefined
+    : {
+        duration: 24,
+        repeat: Infinity,
+        ease: "linear" as const,
+      };
+
+  const borderSpinTransition = prefersReducedMotion
+    ? undefined
+    : {
+        duration: 5,
+        repeat: Infinity,
+        ease: "linear" as const,
       };
 
   const scrollDotTransition = prefersReducedMotion
     ? undefined
     : {
-        duration: 2.6,
+        duration: 2.4,
         repeat: Infinity,
         ease: [0.45, 0, 0.55, 1] as const,
-        times: [0, 0.15, 0.85, 1],
+        times: [0, 0.12, 0.88, 1],
+      };
+
+  const scrollPulseTransition = prefersReducedMotion
+    ? undefined
+    : {
+        duration: 2.4,
+        repeat: Infinity,
+        ease: "easeInOut" as const,
       };
 
   return (
@@ -118,20 +165,7 @@ export default function Hero() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1.1, ease: EASE }}
     >
-      <div className={styles.background} aria-hidden="true">
-        <div className={styles.aurora}>
-          <div className={styles.auroraLayer1} />
-          <div className={styles.auroraLayer2} />
-          <div className={styles.auroraLayer3} />
-        </div>
-        <div className={styles.orbs}>
-          <div className={`${styles.orb} ${styles.orb1}`} />
-          <div className={`${styles.orb} ${styles.orb2}`} />
-          <div className={`${styles.orb} ${styles.orb3}`} />
-        </div>
-        <div className={styles.noise} />
-        <div className={styles.vignette} />
-      </div>
+      <HeroCodeBackground reducedMotion={prefersReducedMotion} />
 
       <motion.div
         className={styles.content}
@@ -141,8 +175,41 @@ export default function Hero() {
       >
         <motion.div className={styles.profileBlock} variants={profileVariants}>
           <motion.div
+            className={styles.orbitRing}
+            animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+            transition={orbitTransition}
+            aria-hidden
+          >
+            <svg viewBox="0 0 200 200" className={styles.orbitSvg}>
+              <circle
+                cx="100"
+                cy="100"
+                r="94"
+                fill="none"
+                stroke="url(#orbitGradient)"
+                strokeWidth="1"
+                strokeDasharray="12 18"
+                strokeLinecap="round"
+              />
+              <defs>
+                <linearGradient id="orbitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.45)" />
+                  <stop offset="50%" stopColor="rgba(185,200,222,0.2)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </motion.div>
+
+          <motion.div
+            className={styles.profileFloat}
             animate={
-              prefersReducedMotion ? undefined : { y: [0, -7, 0] }
+              prefersReducedMotion
+                ? undefined
+                : {
+                    y: [0, -11, -3, -13, 0],
+                    rotate: [0, 0.6, -0.4, 0.5, 0],
+                  }
             }
             transition={floatTransition}
           >
@@ -151,15 +218,37 @@ export default function Hero() {
               animate={
                 prefersReducedMotion
                   ? undefined
-                  : { opacity: [0.65, 1, 0.65], scale: [1, 1.05, 1] }
+                  : { opacity: [0.55, 1, 0.6, 0.95, 0.55], scale: [1, 1.08, 1.02, 1.06, 1] }
               }
               transition={
                 prefersReducedMotion
                   ? undefined
-                  : { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 7, repeat: Infinity, ease: "easeInOut" }
               }
+              aria-hidden
             />
+
             <div className={styles.profileRing}>
+              <motion.div
+                className={styles.profileBorderSpin}
+                animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+                transition={borderSpinTransition}
+                aria-hidden
+              />
+              <motion.div
+                className={styles.profileBorderGlow}
+                animate={
+                  prefersReducedMotion
+                    ? undefined
+                    : { opacity: [0.4, 0.85, 0.5, 0.75, 0.4] }
+                }
+                transition={
+                  prefersReducedMotion
+                    ? undefined
+                    : { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                }
+                aria-hidden
+              />
               <div className={styles.profileInner}>
                 <Image
                   src={PROFILE_IMAGE}
@@ -196,47 +285,36 @@ export default function Hero() {
           ))}
         </h1>
 
-        <motion.p className={styles.description} variants={revealVariants}>
-          Building intelligent software, AI-powered applications, and scalable
-          digital experiences with precision and architectural excellence.
-        </motion.p>
+        <motion.div className={styles.description} variants={revealVariants}>
+          {DESCRIPTION_LINES.map((line) => (
+            <span key={line} className={styles.descriptionLine}>
+              <motion.span
+                className={styles.descriptionLineInner}
+                variants={lineRevealVariants}
+              >
+                {line}
+              </motion.span>
+            </span>
+          ))}
+        </motion.div>
 
         <motion.div className={styles.actions} variants={actionsVariants}>
-          <motion.a
+          <MagneticButton
             href="#projects"
             className={styles.ctaPrimary}
             whileHover={
               prefersReducedMotion
                 ? undefined
                 : {
-                    scale: 1.02,
-                    y: -2,
                     boxShadow: "0 20px 40px rgba(255, 255, 255, 0.12)",
                   }
             }
-            whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 420, damping: 28 }}
           >
             View Projects
-          </motion.a>
-          <motion.a
-            href="#contact"
-            className={styles.ctaSecondary}
-            whileHover={
-              prefersReducedMotion
-                ? undefined
-                : {
-                    scale: 1.02,
-                    y: -2,
-                    backgroundColor: "rgba(255, 255, 255, 0.07)",
-                    borderColor: "rgba(255, 255, 255, 0.22)",
-                  }
-            }
-            whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 420, damping: 28 }}
-          >
+          </MagneticButton>
+          <MagneticButton href="#contact" className={styles.ctaSecondary}>
             Contact Me
-          </motion.a>
+          </MagneticButton>
         </motion.div>
       </motion.div>
 
@@ -245,12 +323,42 @@ export default function Hero() {
         className={styles.scrollIndicator}
         aria-label="Scroll to about section"
         style={{ x: "-50%" }}
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.15, duration: 0.8, ease: EASE }}
+        transition={{ delay: 1.2, duration: 0.85, ease: EASE }}
       >
+        <motion.span
+          className={styles.scrollChevron}
+          animate={prefersReducedMotion ? undefined : { y: [0, 5, 0] }}
+          transition={
+            prefersReducedMotion
+              ? undefined
+              : { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          }
+          aria-hidden
+        >
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+            <path
+              d="M1 1.5L6 6.5L11 1.5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </motion.span>
         <span className={styles.scrollLabel}>Explore</span>
         <div className={styles.scrollTrack}>
+          <motion.span
+            className={styles.scrollPulse}
+            animate={
+              prefersReducedMotion
+                ? undefined
+                : { scaleY: [0, 1, 0], opacity: [0, 0.5, 0], y: [0, 0, 0] }
+            }
+            transition={scrollPulseTransition}
+            aria-hidden
+          />
           <motion.span
             className={styles.scrollDot}
             animate={
@@ -259,6 +367,7 @@ export default function Hero() {
                 : { y: [0, 52, 0], opacity: [0, 1, 1, 0] }
             }
             transition={scrollDotTransition}
+            aria-hidden
           />
         </div>
       </motion.a>

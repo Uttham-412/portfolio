@@ -9,6 +9,8 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
+import MagneticButton from "@/components/ui/MagneticButton";
+import TiltCard from "@/components/ui/TiltCard";
 import styles from "./Projects.module.css";
 
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
@@ -173,7 +175,7 @@ function CaseStudy({
             initial={prefersReducedMotion ? false : "hidden"}
             animate={isInView ? "visible" : "hidden"}
           >
-            <div className={styles.imageFrame}>
+            <TiltCard className={styles.imageFrame} maxTilt={7}>
               <div className={styles.imageWrap}>
                 <Image
                   src={project.image}
@@ -184,7 +186,7 @@ function CaseStudy({
                   priority={project.name === "CareerPath"}
                 />
               </div>
-            </div>
+            </TiltCard>
           </motion.div>
 
           <motion.div
@@ -288,22 +290,25 @@ function CaseStudy({
             </div>
 
             <div className={styles.actions}>
-              <a href={project.demoUrl} className={styles.btnPrimary}>
+              <MagneticButton href={project.demoUrl} className={styles.btnPrimary}>
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
                 >
                   open_in_new
                 </span>
                 Live Demo
-              </a>
-              <a href={project.githubUrl} className={styles.btnSecondary}>
+              </MagneticButton>
+              <MagneticButton
+                href={project.githubUrl}
+                className={styles.btnSecondary}
+              >
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
                 >
                   code
                 </span>
                 GitHub
-              </a>
+              </MagneticButton>
             </div>
           </motion.div>
         </div>
@@ -317,7 +322,6 @@ export default function Projects() {
   const summaryRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const summaryInView = useInView(summaryRef, { once: true, amount: 0.15 });
-  const prefersReducedMotion = useReducedMotion();
 
   return (
     <section ref={sectionRef} id="projects" className={styles.section}>
@@ -360,11 +364,11 @@ export default function Projects() {
             }}
           >
             {highlights.map((item) => (
-              <motion.div
+              <TiltCard
                 key={item.title}
                 className={styles.summaryCard}
                 variants={fadeUpVariants}
-                initial={prefersReducedMotion ? false : undefined}
+                maxTilt={6}
               >
                 <span
                   className={`material-symbols-outlined ${styles.summaryIcon}`}
@@ -373,7 +377,7 @@ export default function Projects() {
                 </span>
                 <h3 className={styles.summaryTitle}>{item.title}</h3>
                 <p className={styles.summaryText}>{item.description}</p>
-              </motion.div>
+              </TiltCard>
             ))}
           </motion.div>
         </div>

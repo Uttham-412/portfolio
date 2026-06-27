@@ -148,7 +148,6 @@
 
 .glassCard:hover {
   border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-6px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 32px 56px -24px rgba(0, 0, 0, 0.7);

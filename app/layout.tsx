@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import ExperienceShell from "@/components/experience/ExperienceShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,8 +54,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full font-body-md text-body-md bg-background text-on-background selection:bg-white/10 selection:text-white">
-        {children}
+      <body className="min-h-full font-body-md text-body-md text-on-background selection:bg-white/10 selection:text-white">
+        <ExperienceShell>{children}</ExperienceShell>
       </body>
     </html>
   );

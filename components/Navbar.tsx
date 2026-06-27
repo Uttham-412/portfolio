@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { useScrollNav } from "@/hooks/useScrollNav";
+import MagneticButton from "@/components/ui/MagneticButton";
 import styles from "./Navbar.module.css";
 
 const navLinks = [
@@ -104,9 +105,9 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a href="#" className={styles.resumeBtn}>
+            <MagneticButton href="#" className={styles.resumeBtn} strength={0.22}>
               Download Resume
-            </a>
+            </MagneticButton>
           </div>
 
           <button

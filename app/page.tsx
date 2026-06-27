@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="relative overflow-x-hidden">
+      <main className="relative overflow-x-hidden z-[1]">
         <Hero />
         <About />
         <Experience />

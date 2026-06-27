@@ -1,0 +1,369 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: #080808;
+}
+
+.base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 130% 90% at 50% -15%,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 80% 70%,
+      rgba(185, 200, 222, 0.03) 0%,
+      transparent 55%
+    ),
+    linear-gradient(180deg, #0b0b0b 0%, #090909 48%, #070707 100%);
+}
+
+.aurora {
+  position: absolute;
+  inset: -40%;
+  filter: blur(100px);
+  opacity: 0.95;
+}
+
+.auroraBand1,
+.auroraBand2,
+.auroraBand3,
+.auroraBand4 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.auroraBand1 {
+  background: radial-gradient(
+    ellipse 52% 42% at 46% 16%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 68%
+  );
+  animation: auroraFlow1 22s ease-in-out infinite;
+}
+
+.auroraBand2 {
+  background: radial-gradient(
+    ellipse 44% 36% at 74% 44%,
+    rgba(185, 200, 222, 0.07) 0%,
+    transparent 70%
+  );
+  animation: auroraFlow2 28s ease-in-out infinite;
+}
+
+.auroraBand3 {
+  background: radial-gradient(
+    ellipse 40% 34% at 18% 58%,
+    rgba(255, 255, 255, 0.045) 0%,
+    transparent 72%
+  );
+  animation: auroraFlow3 26s ease-in-out infinite;
+}
+
+.auroraBand4 {
+  background: radial-gradient(
+    ellipse 36% 28% at 62% 78%,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 75%
+  );
+  animation: auroraFlow4 32s ease-in-out infinite;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(
+    ellipse 88% 78% at 50% 38%,
+    #000 18%,
+    transparent 74%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 88% 78% at 50% 38%,
+    #000 18%,
+    transparent 74%
+  );
+  animation: gridDrift 40s linear infinite;
+}
+
+.gridGlow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(
+    ellipse 55% 45% at 50% 42%,
+    #000 0%,
+    transparent 72%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 55% 45% at 50% 42%,
+    #000 0%,
+    transparent 72%
+  );
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+.spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 1;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.65;
+}
+
+.radialGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.012) 28%,
+    transparent 62%
+  );
+  animation: glowPulse 18s ease-in-out infinite;
+}
+
+.orbs {
+  position: absolute;
+  inset: 0;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform;
+}
+
+.orb1 {
+  top: 8%;
+  left: 10%;
+  width: min(32vw, 420px);
+  height: min(32vw, 420px);
+  background: rgba(255, 255, 255, 0.035);
+  animation: orbDrift1 26s ease-in-out infinite;
+}
+
+.orb2 {
+  top: 42%;
+  right: 4%;
+  width: min(28vw, 360px);
+  height: min(28vw, 360px);
+  background: rgba(185, 200, 222, 0.028);
+  animation: orbDrift2 32s ease-in-out infinite;
+}
+
+.orb3 {
+  bottom: 12%;
+  left: 28%;
+  width: min(24vw, 300px);
+  height: min(24vw, 300px);
+  background: rgba(255, 255, 255, 0.024);
+  animation: orbDrift3 22s ease-in-out infinite;
+}
+
+.orb4 {
+  top: 68%;
+  left: 62%;
+  width: min(20vw, 260px);
+  height: min(20vw, 260px);
+  background: rgba(255, 255, 255, 0.02);
+  animation: orbDrift4 34s ease-in-out infinite;
+}
+
+.noise {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  animation: noiseDrift 10s steps(8) infinite;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 72% 58% at 50% 45%,
+      transparent 35%,
+      rgba(6, 6, 6, 0.58) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(6, 6, 6, 0.38) 0%,
+      transparent 18%,
+      transparent 82%,
+      rgba(6, 6, 6, 0.48) 100%
+    );
+}
+
+@keyframes auroraFlow1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(4%, -3%) scale(1.06) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+@keyframes auroraFlow2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-5%, 4%) scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+@keyframes auroraFlow3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(3%, 5%) scale(1.05);
+    opacity: 0.75;
+  }
+}
+
+@keyframes auroraFlow4 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(-3%, -4%) scale(1.04);
+    opacity: 0.65;
+  }
+}
+
+@keyframes gridDrift {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 72px 72px, 72px 72px;
+  }
+}
+
+@keyframes gridPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes orbDrift1 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(32px, -40px);
+  }
+}
+
+@keyframes orbDrift2 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-36px, 28px);
+  }
+}
+
+@keyframes orbDrift3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(24px, -20px);
+  }
+}
+
+@keyframes orbDrift4 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-20px, -32px);
+  }
+}
+
+@keyframes noiseDrift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-4%, -4%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auroraBand1,
+  .auroraBand2,
+  .auroraBand3,
+  .auroraBand4,
+  .radialGlow,
+  .orb,
+  .noise,
+  .grid,
+  .gridGlow {
+    animation: none;
+  }
+}

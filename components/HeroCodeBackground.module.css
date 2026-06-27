@@ -1,0 +1,132 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.contentMask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(
+    ellipse 38% 44% at 50% 46%,
+    rgba(8, 8, 8, 0.92) 0%,
+    rgba(8, 8, 8, 0.55) 42%,
+    transparent 72%
+  );
+}
+
+.snippet {
+  position: absolute;
+  max-width: min(280px, 34vw);
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  white-space: pre;
+  user-select: none;
+  box-shadow:
+    0 0 24px rgba(96, 165, 250, 0.04),
+    0 0 48px rgba(167, 139, 250, 0.03);
+  will-change: transform, opacity;
+}
+
+.pre {
+  margin: 0;
+  font: inherit;
+}
+
+.line {
+  min-height: 1.55em;
+}
+
+.token {
+  transition: background-color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.plain {
+  color: rgba(186, 198, 220, 0.72);
+}
+
+.kw {
+  color: rgba(167, 139, 250, 0.82);
+}
+
+.ty {
+  color: rgba(103, 232, 249, 0.78);
+}
+
+.fn {
+  color: rgba(96, 165, 250, 0.85);
+}
+
+.str {
+  color: rgba(125, 211, 252, 0.72);
+}
+
+.cm {
+  color: rgba(148, 163, 184, 0.45);
+  font-style: italic;
+}
+
+.op {
+  color: rgba(186, 198, 220, 0.65);
+}
+
+.num {
+  color: rgba(196, 181, 253, 0.75);
+}
+
+.highlightWord {
+  border-radius: 2px;
+}
+
+.highlightActive {
+  background: rgba(96, 165, 250, 0.14);
+  text-shadow: 0 0 12px rgba(96, 165, 250, 0.35);
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: rgba(103, 232, 249, 0.75);
+  box-shadow: 0 0 6px rgba(103, 232, 249, 0.45);
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(103, 232, 249, 0.65);
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.35);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .snippet {
+    max-width: min(210px, 42vw);
+  }
+
+  .hideMd {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hideSm {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none !important;
+    opacity: 0.6;
+  }
+}

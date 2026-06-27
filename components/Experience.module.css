@@ -4,36 +4,6 @@
   padding-bottom: clamp(6rem, 12vw, var(--spacing-section-gap));
 }
 
-.ambientTop {
-  position: absolute;
-  top: 0;
-  left: 25%;
-  width: 600px;
-  height: 600px;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.03) 0%,
-    transparent 70%
-  );
-}
-
-.ambientBottom {
-  position: absolute;
-  bottom: 0;
-  right: 25%;
-  width: 600px;
-  height: 600px;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.03) 0%,
-    transparent 70%
-  );
-}
-
 .container {
   position: relative;
   z-index: 1;

@@ -58,11 +58,7 @@
 }
 
 .caseStudyMuted {
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(255, 255, 255, 0.025) 0%,
-    transparent 70%
-  );
+  /* depth handled by global section layer */
 }
 
 .caseInner {

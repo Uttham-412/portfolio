@@ -10,6 +10,7 @@ import {
   type Variants,
 } from "framer-motion";
 import { useRef } from "react";
+import TiltCard from "@/components/ui/TiltCard";
 import styles from "./Experience.module.css";
 
 const timelineItems = [
@@ -81,8 +82,9 @@ function TimelineCard({
   highlight?: boolean;
 }) {
   return (
-    <div
+    <TiltCard
       className={`${styles.card} ${highlight ? styles.cardHighlight : ""}`}
+      maxTilt={6}
     >
       <span
         className={`${styles.step} ${
@@ -106,7 +108,7 @@ function TimelineCard({
           </span>
         ))}
       </div>
-    </div>
+    </TiltCard>
   );
 }
 
@@ -239,9 +241,6 @@ export default function Experience() {
 
   return (
     <section ref={sectionRef} id="experience" className={styles.section}>
-      <div className={styles.ambientTop} aria-hidden />
-      <div className={styles.ambientBottom} aria-hidden />
-
       <div className={styles.container}>
         <motion.header
           className={styles.header}
