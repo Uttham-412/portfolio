@@ -19,13 +19,15 @@ export default function TiltCard({
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  // isPointerFine is false on all touch/mobile devices — tilt is a
+  // pointer-only interaction; we skip every handler on mobile.
   const { isPointerFine } = useMouse();
   const rafRef = useRef<number>(0);
 
   const handleMove = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      // Guard: no-op on mobile / reduced-motion
       if (prefersReducedMotion || !isPointerFine || !ref.current) return;
-      // Throttle CSS property writes to one per animation frame
       if (rafRef.current) return;
       const clientX = event.clientX;
       const clientY = event.clientY;
@@ -34,10 +36,8 @@ export default function TiltCard({
         const rect = ref.current.getBoundingClientRect();
         const x = (clientX - rect.left) / rect.width - 0.5;
         const y = (clientY - rect.top) / rect.height - 0.5;
-        const rotateX = -y * maxTilt;
-        const rotateY = x * maxTilt;
-        ref.current.style.setProperty("--tilt-x", `${rotateX}deg`);
-        ref.current.style.setProperty("--tilt-y", `${rotateY}deg`);
+        ref.current.style.setProperty("--tilt-x", `${-y * maxTilt}deg`);
+        ref.current.style.setProperty("--tilt-y", `${x * maxTilt}deg`);
         ref.current.style.setProperty("--glare-x", `${(x + 0.5) * 100}%`);
         ref.current.style.setProperty("--glare-y", `${(y + 0.5) * 100}%`);
         rafRef.current = 0;
@@ -59,6 +59,8 @@ export default function TiltCard({
   return (
     <motion.div
       ref={ref}
+      // On mobile isPointerFine=false so handlers are no-ops; attaching them
+      // is fine — React event delegation means zero extra DOM listeners.
       className={`tilt-card ${glare ? "tilt-card-glare" : ""} ${className ?? ""}`}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}

@@ -432,3 +432,38 @@
   color: var(--color-outline);
   max-width: 12rem;
 }
+
+/* ─── Mobile ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Reduce backdrop blur — most expensive effect on mobile GPUs */
+  .glassCard {
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+
+  /* Stat cards: 2-column grid looks better than 1-column on most phones */
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Smaller stat number on very narrow screens */
+  .statNumber {
+    font-size: clamp(3rem, 10vw, 4.5rem);
+  }
+
+  /* Tech panel: don't sticky on mobile */
+  .techPanel {
+    position: static;
+    min-height: 18rem;
+  }
+
+  /* Disable hover lifts that create stuck hover states on touch */
+  .glassCard:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+
+  .techTag:hover {
+    transform: none;
+  }
+}

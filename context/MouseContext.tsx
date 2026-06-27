@@ -29,11 +29,15 @@ const MouseContext = createContext<MouseContextValue | null>(null);
 
 export function MouseProvider({ children }: { children: ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
+  // isPointerFine stays false on touch devices — all pointer-dependent effects
+  // (magnetic, tilt, cursor glow, parallax) bail out via this flag.
   const [isPointerFine, setIsPointerFine] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
+  // Spring values are only consumed by pointer-fine effects.
+  // On mobile these motion values sit idle, costing nothing.
   const springX = useSpring(x, { stiffness: 55, damping: 24, mass: 0.9 });
   const springY = useSpring(y, { stiffness: 55, damping: 24, mass: 0.9 });
 
@@ -54,8 +58,8 @@ export function MouseProvider({ children }: { children: ReactNode }) {
     centerPointer();
 
     const onMove = (event: MouseEvent) => {
+      // On touch devices media.matches is false — early return, zero work
       if (!media.matches || prefersReducedMotion) return;
-      // Throttle to one update per animation frame
       if (rafRef.current) return;
       rafRef.current = requestAnimationFrame(() => {
         x.set(event.clientX);
@@ -65,7 +69,8 @@ export function MouseProvider({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    window.addEventListener("resize", centerPointer);
+    // Resize only matters for re-centering the spring origin — cheap
+    window.addEventListener("resize", centerPointer, { passive: true });
 
     return () => {
       media.removeEventListener("change", updatePointer);

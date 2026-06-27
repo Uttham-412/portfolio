@@ -513,3 +513,48 @@
     transform: none;
   }
 }
+
+/* ─── Mobile ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Buttons full-width and meet 44px tap target */
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  /* Remove hover lifts that get stuck on touch */
+  .imageFrame:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .imageFrame:hover .image {
+    transform: none;
+  }
+
+  .summaryCard:hover,
+  .detailBlock:hover,
+  .stackChip:hover,
+  .featureItem:hover,
+  .btnPrimary:hover,
+  .btnSecondary:hover {
+    transform: none;
+  }
+
+  /* Reduce backdrop blur on project cards */
+  .imageFrame {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .summaryCard {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

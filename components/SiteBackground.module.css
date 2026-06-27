@@ -362,21 +362,49 @@
   }
 }
 
-@media (max-width: 768px) {
-  /* Reduce heavy blur filters on mobile to improve GPU performance */
+@media (max-width: 767px) {
+  /* Reduce aurora blur — halving it saves significant GPU rasterization time */
   .aurora {
-    filter: blur(70px);
-    opacity: 0.7;
+    filter: blur(60px);
+    opacity: 0.65;
   }
+
+  /* Disable the two less-visible orbs to halve blur-filter layers */
+  .orb3,
+  .orb4 {
+    display: none;
+  }
+
+  /* Reduce remaining orb blur — blur(100px) is expensive on mobile */
   .orb {
-    filter: blur(70px);
+    filter: blur(60px);
   }
-  /* Disable grid drift animation on mobile — saves a compositor layer */
+
+  /* Disable grid drift and glow pulse — saves two compositor threads */
   .grid {
     animation: none;
   }
   .gridGlow {
     animation: none;
+    opacity: 0.3;
+  }
+
+  /* Slow aurora animations on mobile — fewer repaints per second */
+  .auroraBand1 { animation-duration: 36s; }
+  .auroraBand2 { animation-duration: 44s; }
+  .auroraBand3 { animation-duration: 40s; }
+  .auroraBand4 { animation-duration: 50s; }
+
+  /* Noise texture: lower opacity, fewer animated frames */
+  .noise {
+    opacity: 0.018;
+    animation-timing-function: steps(4);
+  }
+
+  /* Radial glow: disable animation, keep static */
+  .radialGlow {
+    animation: none;
+    opacity: 0.7;
   }
 }
 

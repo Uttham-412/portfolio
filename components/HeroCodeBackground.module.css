@@ -144,10 +144,21 @@
   box-shadow: 0 0 6px rgba(103, 232, 249, 0.4);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .snippet {
-    max-width: min(200px, 40vw);
-    font-size: 10px;
+    max-width: min(180px, 42vw);
+    font-size: 9.5px;
+    /* Remove backdrop-filter on mobile — each frosted glass element
+       forces a GPU texture pass; with 2 snippets this is acceptable
+       but only without the backdrop-filter stacking cost */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(12, 14, 22, 0.72);
+  }
+
+  /* Simplify box-shadow on mobile */
+  .snippet {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   }
 }
 

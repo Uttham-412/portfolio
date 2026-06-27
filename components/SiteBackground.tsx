@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion, useMotionTemplate, useReducedMotion } from "framer-motion";
 import { useMouse } from "@/context/MouseContext";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./SiteBackground.module.css";
 
 type Particle = {
@@ -17,6 +18,7 @@ type Particle = {
 function FloatingParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -34,14 +36,15 @@ function FloatingParticles() {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      // Reduce particle count: max 32 on desktop, fewer on mobile
-      const count = Math.min(32, Math.floor(window.innerWidth / 55));
+      // Mobile: max 8 particles. Desktop: max 32.
+      const max = isMobile ? 8 : 32;
+      const count = Math.min(max, Math.floor(window.innerWidth / 55));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         size: Math.random() * 1.2 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.15,
-        speedY: (Math.random() - 0.5) * 0.15,
+        speedX: (Math.random() - 0.5) * (isMobile ? 0.08 : 0.15),
+        speedY: (Math.random() - 0.5) * (isMobile ? 0.08 : 0.15),
         opacity: Math.random() * 0.3 + 0.07,
       }));
     };
@@ -71,13 +74,12 @@ function FloatingParticles() {
       animationId = requestAnimationFrame(draw);
     };
 
-    // Pause canvas loop when tab is hidden to save GPU/CPU
+    // Pause when tab is hidden — saves GPU + battery on mobile
     const handleVisibility = () => {
       paused = document.hidden;
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
-    // Debounce resize to avoid thrashing
     let resizeTimer = 0;
     const onResize = () => {
       clearTimeout(resizeTimer);
@@ -86,7 +88,7 @@ function FloatingParticles() {
 
     resize();
     draw();
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       cancelAnimationFrame(animationId);
@@ -94,7 +96,7 @@ function FloatingParticles() {
       document.removeEventListener("visibilitychange", handleVisibility);
       clearTimeout(resizeTimer);
     };
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, isMobile]);
 
   if (prefersReducedMotion) return null;
 
@@ -114,6 +116,7 @@ function MouseSpotlight() {
     transparent 64%
   )`;
 
+  // isPointerFine=false on mobile — this component simply doesn't render
   if (prefersReducedMotion || !isPointerFine) return null;
 
   return (

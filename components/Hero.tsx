@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import HeroCodeBackground from "@/components/HeroCodeBackground";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./Hero.module.css";
 
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
@@ -111,8 +112,11 @@ const DESCRIPTION_LINES = [
 
 export default function Hero() {
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  // Treat mobile same as reduced-motion for expensive infinite animations
+  const skipAnimation = prefersReducedMotion || isMobile;
 
-  const floatTransition = prefersReducedMotion
+  const floatTransition = skipAnimation
     ? undefined
     : {
         duration: 7,
@@ -120,7 +124,7 @@ export default function Hero() {
         ease: "easeInOut" as const,
       };
 
-  const orbitTransition = prefersReducedMotion
+  const orbitTransition = skipAnimation
     ? undefined
     : {
         duration: 24,
@@ -128,7 +132,7 @@ export default function Hero() {
         ease: "linear" as const,
       };
 
-  const borderSpinTransition = prefersReducedMotion
+  const borderSpinTransition = skipAnimation
     ? undefined
     : {
         duration: 5,
@@ -136,7 +140,7 @@ export default function Hero() {
         ease: "linear" as const,
       };
 
-  const scrollDotTransition = prefersReducedMotion
+  const scrollDotTransition = skipAnimation
     ? undefined
     : {
         duration: 2.4,
@@ -145,7 +149,7 @@ export default function Hero() {
         times: [0, 0.12, 0.88, 1],
       };
 
-  const scrollPulseTransition = prefersReducedMotion
+  const scrollPulseTransition = skipAnimation
     ? undefined
     : {
         duration: 2.4,
@@ -157,7 +161,7 @@ export default function Hero() {
     <motion.section
       id="hero"
       className={styles.hero}
-      initial={prefersReducedMotion ? false : { opacity: 0 }}
+      initial={skipAnimation ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.1, ease: EASE }}
     >
@@ -172,7 +176,7 @@ export default function Hero() {
         <motion.div className={styles.profileBlock} variants={profileVariants}>
           <motion.div
             className={styles.orbitRing}
-            animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+            animate={skipAnimation ? undefined : { rotate: 360 }}
             transition={orbitTransition}
             aria-hidden
           >
@@ -200,7 +204,7 @@ export default function Hero() {
           <motion.div
             className={styles.profileFloat}
             animate={
-              prefersReducedMotion
+              skipAnimation
                 ? undefined
                 : {
                     y: [0, -11, -3, -13, 0],
@@ -212,12 +216,12 @@ export default function Hero() {
             <motion.div
               className={styles.profileGlow}
               animate={
-                prefersReducedMotion
+                skipAnimation
                   ? undefined
                   : { opacity: [0.55, 1, 0.6, 0.95, 0.55], scale: [1, 1.08, 1.02, 1.06, 1] }
               }
               transition={
-                prefersReducedMotion
+                skipAnimation
                   ? undefined
                   : { duration: 7, repeat: Infinity, ease: "easeInOut" }
               }
@@ -227,19 +231,19 @@ export default function Hero() {
             <div className={styles.profileRing}>
               <motion.div
                 className={styles.profileBorderSpin}
-                animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+                animate={skipAnimation ? undefined : { rotate: 360 }}
                 transition={borderSpinTransition}
                 aria-hidden
               />
               <motion.div
                 className={styles.profileBorderGlow}
                 animate={
-                  prefersReducedMotion
+                  skipAnimation
                     ? undefined
                     : { opacity: [0.4, 0.85, 0.5, 0.75, 0.4] }
                 }
                 transition={
-                  prefersReducedMotion
+                  skipAnimation
                     ? undefined
                     : { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }
@@ -325,9 +329,9 @@ export default function Hero() {
       >
         <motion.span
           className={styles.scrollChevron}
-          animate={prefersReducedMotion ? undefined : { y: [0, 5, 0] }}
+          animate={skipAnimation ? undefined : { y: [0, 5, 0] }}
           transition={
-            prefersReducedMotion
+            skipAnimation
               ? undefined
               : { duration: 2, repeat: Infinity, ease: "easeInOut" }
           }
@@ -348,7 +352,7 @@ export default function Hero() {
           <motion.span
             className={styles.scrollPulse}
             animate={
-              prefersReducedMotion
+              skipAnimation
                 ? undefined
                 : { scaleY: [0, 1, 0], opacity: [0, 0.5, 0], y: [0, 0, 0] }
             }
@@ -358,7 +362,7 @@ export default function Hero() {
           <motion.span
             className={styles.scrollDot}
             animate={
-              prefersReducedMotion
+              skipAnimation
                 ? undefined
                 : { y: [0, 52, 0], opacity: [0, 1, 1, 0] }
             }

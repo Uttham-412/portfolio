@@ -24,7 +24,6 @@ function useMagneticHandlers(strength: number) {
     (event: React.MouseEvent) => {
       const element = ref.current;
       if (prefersReducedMotion || !isPointerFine || !element) return;
-      // Throttle to one DOM write per animation frame
       if (rafRef.current) return;
       const clientX = event.clientX;
       const clientY = event.clientY;
@@ -48,7 +47,7 @@ function useMagneticHandlers(strength: number) {
     ref.current.style.transform = "";
   }, []);
 
-  return { ref, handleMove, handleLeave, prefersReducedMotion };
+  return { ref, handleMove, handleLeave, prefersReducedMotion, isPointerFine };
 }
 
 type MagneticAnchorProps = BaseProps &
@@ -72,7 +71,7 @@ export default function MagneticButton(props: MagneticButtonProps) {
     ...rest
   } = props;
 
-  const { ref, handleMove, handleLeave, prefersReducedMotion } =
+  const { ref, handleMove, handleLeave, prefersReducedMotion, isPointerFine } =
     useMagneticHandlers(strength);
 
   if (as === "button") {
@@ -83,7 +82,8 @@ export default function MagneticButton(props: MagneticButtonProps) {
         className={className}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
-        whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+        // whileTap spring only fires on pointer-fine devices (desktop)
+        whileTap={prefersReducedMotion || !isPointerFine ? undefined : { scale: 0.97 }}
         transition={{ type: "spring", stiffness: 420, damping: 28 }}
         {...buttonProps}
       >
@@ -99,7 +99,7 @@ export default function MagneticButton(props: MagneticButtonProps) {
       className={className}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+      whileTap={prefersReducedMotion || !isPointerFine ? undefined : { scale: 0.97 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
       {...anchorProps}
     >

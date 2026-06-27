@@ -11,6 +11,7 @@ import {
 } from "framer-motion";
 import { useRef } from "react";
 import TiltCard from "@/components/ui/TiltCard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./Experience.module.css";
 
 const timelineItems = [
@@ -120,7 +121,12 @@ function TimelineEntry({
   const entryRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(entryRef, { once: true, amount: 0.2 });
   const prefersReducedMotion = useReducedMotion();
-  const slideFrom = item.side === "left" ? -56 : 56;
+  const isMobile = useIsMobile();
+  // On mobile use a smaller slide distance — large x-translations can
+  // cause horizontal overflow flashes on narrow screens
+  const slideFrom = item.side === "left"
+    ? (isMobile ? -24 : -56)
+    : (isMobile ? 24 : 56);
 
   return (
     <div
@@ -177,6 +183,7 @@ function PresentEntry() {
   const entryRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(entryRef, { once: true, amount: 0.2 });
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
 
   return (
     <div ref={entryRef} className={`${styles.entry} ${styles.entryLeft}`}>
@@ -185,7 +192,7 @@ function PresentEntry() {
         initial={
           prefersReducedMotion
             ? false
-            : { opacity: 0, x: -56, y: 24 }
+            : { opacity: 0, x: isMobile ? -24 : -56, y: 24 }
         }
         animate={
           isInView
@@ -231,7 +238,10 @@ export default function Experience() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(sectionRef, { once: true, amount: 0.15 });
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
 
+  // Skip scroll-driven line animation on mobile — useScroll attaches a
+  // passive scroll listener and runs transform calculations on every frame
   const { scrollYProgress } = useScroll({
     target: timelineRef,
     offset: ["start 0.85", "end 0.35"],
@@ -262,7 +272,7 @@ export default function Experience() {
             className={styles.lineProgress}
             aria-hidden
             style={{
-              height: prefersReducedMotion ? "100%" : lineHeight,
+              height: (prefersReducedMotion || isMobile) ? "100%" : lineHeight,
             }}
           />
 

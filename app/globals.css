@@ -120,6 +120,11 @@ body {
   color: #e2e2e2;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* Tell the browser this element only pans vertically — eliminates
+     the 300ms touch-delay and allows passive scroll optimisation */
+  touch-action: pan-y;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 
 .site-shell {
@@ -286,6 +291,14 @@ body {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@media (max-width: 767px) {
+  /* Reduce per-card blur from 28px → 10px — each card is a new GPU texture */
+  .glass-card-skills {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
 .glass-card-skills:hover {
   border-color: rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.04);
@@ -339,6 +352,13 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 24px 48px -32px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 767px) {
+  .glass-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 .tilt-card {
@@ -424,6 +444,54 @@ body {
 }
 .delay-500 {
   animation-delay: 750ms;
+}
+
+/* ─── Mobile-specific overrides (<768px) ─────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Enforce minimum 44×44px tap targets on all interactive elements */
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent any horizontal overflow from leaking out of sections */
+  #hero, #about, #experience, #skills, #projects, #contact {
+    overflow-x: hidden;
+  }
+
+  /* Disable 3D tilt on mobile — saves perspective matrix recalculations */
+  .tilt-card {
+    transform: none !important;
+    will-change: auto;
+    contain: layout style;
+  }
+
+  .tilt-card-glare::before {
+    display: none;
+  }
+
+  /* Disable hover lift animations — no hover on touch screens */
+  .glass-card-skills:hover,
+  .glass-card-projects:hover,
+  .glass-card-experience:hover,
+  .premium-card:hover {
+    transform: none;
+  }
+
+  /* Faster, simpler reveal transitions on mobile */
+  .reveal {
+    transition-duration: 0.6s;
+  }
+  .reveal-sm,
+  .reveal-projects,
+  .reveal-animation {
+    transition-duration: 0.5s;
+  }
+
+  /* Remove scale transforms from skill chips on mobile — layout-safe */
+  .skill-chip:hover {
+    transform: none;
+  }
 }
 
 /* About */

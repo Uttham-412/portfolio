@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { memo, useEffect, useRef, useState } from "react";
 import TiltCard from "@/components/ui/TiltCard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./About.module.css";
 
 const techStack = ["Python", "React", "PyTorch", "Node.js", "Docker"];
@@ -148,6 +149,7 @@ const AnimatedStatCard = memo(function AnimatedStatCard({
 
 export default function About() {
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, {
     once: true,
@@ -241,7 +243,7 @@ export default function About() {
                     key={tech}
                     className={styles.techTag}
                     initial={
-                      prefersReducedMotion
+                      prefersReducedMotion || isMobile
                         ? false
                         : { opacity: 0, y: 12, scale: 0.96 }
                     }
@@ -251,9 +253,10 @@ export default function About() {
                         : { opacity: 0, y: 12, scale: 0.96 }
                     }
                     transition={{
-                      duration: 0.55,
+                      duration: 0.45,
                       ease: EASE,
-                      delay: prefersReducedMotion ? 0 : 0.45 + index * 0.07,
+                      // Halve stagger delay on mobile — feels snappier
+                      delay: prefersReducedMotion || isMobile ? 0 : 0.35 + index * 0.05,
                     }}
                   >
                     {tech}

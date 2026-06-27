@@ -335,3 +335,41 @@
     animation: none;
   }
 }
+
+/* ─── Mobile ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .hero {
+    /* Prevent content from causing horizontal scroll on small screens */
+    overflow-x: hidden;
+  }
+
+  /* Ensure CTA buttons meet 44px touch target minimum */
+  .ctaPrimary,
+  .ctaSecondary {
+    min-height: 52px;
+    padding: 1rem 2rem;
+  }
+
+  /* Orbit ring: use CSS animation instead of Framer Motion on mobile
+     The JS-driven rotation is replaced by pure CSS via will-change:auto
+     to avoid promoting an unnecessary compositor layer */
+  .orbitRing {
+    will-change: auto;
+  }
+
+  /* Profile glow filter is expensive on low-end GPUs */
+  .profileGlow {
+    filter: blur(20px);
+  }
+
+  /* Reduce description text on very small screens */
+  .description {
+    font-size: clamp(0.9375rem, 4.5vw, 1.125rem);
+  }
+
+  /* Hide lower-priority description lines on very small screens to reduce
+     Framer Motion child count — keeps the stagger list shorter */
+  .descriptionLine:nth-child(n+2) {
+    display: none;
+  }
+}

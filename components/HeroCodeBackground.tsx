@@ -3,6 +3,7 @@
 import { motion, useTransform } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMouse } from "@/context/MouseContext";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./HeroCodeBackground.module.css";
 
 type TokenClass = "kw" | "ty" | "str" | "fn" | "cm" | "op" | "num" | "plain";
@@ -36,6 +37,7 @@ type SnippetInstance = {
 };
 
 const MAX_SNIPPETS = 5;
+const MAX_SNIPPETS_MOBILE = 2;  // mobile: keep GPU load minimal
 const EDGE_MARGIN = 11;
 const EXCLUSION = { cx: 50, cy: 46, rx: 24, ry: 30 };
 const MIN_SNIPPET_DISTANCE = 14;
@@ -308,10 +310,12 @@ type LifecyclePhase = "waiting" | "fadeIn" | "typing" | "pause" | "fadeOut";
 function FloatingSnippet({
   instance,
   reducedMotion,
+  isMobile,
   onCycleComplete,
 }: {
   instance: SnippetInstance;
   reducedMotion: boolean | null;
+  isMobile: boolean;
   onCycleComplete: (instanceId: string) => void;
 }) {
   const { springX, springY, isPointerFine } = useMouse();
@@ -320,13 +324,14 @@ function FloatingSnippet({
   );
   const [typedChars, setTypedChars] = useState<Record<number, number>>({});
 
+  // Parallax is pointer-only — returns 0 on mobile/touch automatically
   const parallaxX = useTransform(springX, (value) => {
-    if (!isPointerFine || reducedMotion) return 0;
+    if (!isPointerFine || reducedMotion || isMobile) return 0;
     return (value / window.innerWidth - 0.5) * instance.parallaxFactor * 18;
   });
 
   const parallaxY = useTransform(springY, (value) => {
-    if (!isPointerFine || reducedMotion) return 0;
+    if (!isPointerFine || reducedMotion || isMobile) return 0;
     return (value / window.innerHeight - 0.5) * instance.parallaxFactor * 14;
   });
 
@@ -338,7 +343,9 @@ function FloatingSnippet({
   }, [instance.template]);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    // On mobile skip the full typing lifecycle — just fade in and stay static.
+    // This eliminates dozens of setTimeout calls per snippet.
+    if (reducedMotion || isMobile) return;
 
     const timers: number[] = [];
 
@@ -384,6 +391,7 @@ function FloatingSnippet({
   }, [
     phase,
     reducedMotion,
+    isMobile,
     instance.spawnDelay,
     instance.instanceId,
     typingTargets,
@@ -401,6 +409,7 @@ function FloatingSnippet({
 
   const showCursor =
     !reducedMotion &&
+    !isMobile &&
     (phase === "typing" || phase === "pause") &&
     typingTargets.some(
       ({ lineIndex, text }) => (typedChars[lineIndex] ?? 0) < text.length,
@@ -425,12 +434,12 @@ function FloatingSnippet({
         className={styles.snippet}
         style={{
           rotate: instance.rotate,
-          // Clamp blur to 0.5px max — still gives depth without heavy GPU cost
-          filter: instance.blur > 0.5 ? `blur(0.5px)` : undefined,
+          // No blur on mobile — even 0.5px blur creates a stacking context
+          filter: !isMobile && instance.blur > 0.5 ? `blur(0.5px)` : undefined,
         }}
         initial={{ opacity: 0 }}
         animate={
-          reducedMotion
+          reducedMotion || isMobile
             ? { opacity: instance.baseOpacity, y: 0 }
             : {
                 opacity,
@@ -438,14 +447,15 @@ function FloatingSnippet({
               }
         }
         transition={
-          reducedMotion
-            ? { duration: 0.5 }
+          reducedMotion || isMobile
+            ? { duration: 0.6, ease: "easeOut" }
             : phase === "fadeIn" || phase === "fadeOut"
               ? { opacity: { duration: phase === "fadeIn" ? 0.7 : 0.9, ease: "easeOut" } }
               : {
                   opacity: { duration: 0.6 },
                   y: {
-                    duration: instance.floatDuration,
+                    // Slow float down on mobile to reduce compositor work
+                    duration: instance.floatDuration * (isMobile ? 1.8 : 1),
                     repeat: Infinity,
                     ease: "easeInOut",
                   },
@@ -464,7 +474,8 @@ function FloatingSnippet({
           {instance.template.lines.map((line, lineIndex) => {
             const isTypingLine = instance.template.typingLines.includes(lineIndex);
             const fullText = lineToText(line);
-            const visibleCount = reducedMotion
+            // On mobile show all text immediately — no character-by-character state
+            const visibleCount = reducedMotion || isMobile
               ? fullText.length
               : isTypingLine
                 ? typedChars[lineIndex] ?? 0
@@ -474,6 +485,7 @@ function FloatingSnippet({
 
             const showLine =
               reducedMotion ||
+              isMobile ||
               !isTypingLine ||
               visibleCount > 0 ||
               phase === "pause" ||
@@ -530,10 +542,14 @@ export default function HeroCodeBackground({
 }) {
   const [mounted, setMounted] = useState(false);
   const [snippets, setSnippets] = useState<SnippetInstance[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    const resolveCount = () =>
-      window.innerWidth < 640 ? 3 : window.innerWidth < 900 ? 4 : MAX_SNIPPETS;
+    const resolveCount = () => {
+      if (window.innerWidth < 640) return MAX_SNIPPETS_MOBILE;
+      if (window.innerWidth < 900) return 4;
+      return MAX_SNIPPETS;
+    };
 
     const syncSnippets = () => {
       const nextCount = resolveCount();
@@ -559,11 +575,22 @@ export default function HeroCodeBackground({
 
     syncSnippets();
     setMounted(true);
-    window.addEventListener("resize", syncSnippets);
-    return () => window.removeEventListener("resize", syncSnippets);
+
+    // Debounce resize to avoid thrashing snippet state
+    let resizeTimer = 0;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(syncSnippets, 200);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", onResize);
+      clearTimeout(resizeTimer);
+    };
   }, []);
 
   const handleCycleComplete = useCallback((instanceId: string) => {
+    // On mobile snippets don't cycle — they stay static, so this is never called
     setSnippets((prev) => {
       const occupied = prev
         .filter((s) => s.instanceId !== instanceId)
@@ -589,6 +616,7 @@ export default function HeroCodeBackground({
             key={snippet.instanceId}
             instance={snippet}
             reducedMotion={reducedMotion}
+            isMobile={isMobile}
             onCycleComplete={handleCycleComplete}
           />
         ))}

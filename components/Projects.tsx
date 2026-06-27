@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import TiltCard from "@/components/ui/TiltCard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./Projects.module.css";
 
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
@@ -150,7 +151,11 @@ function CaseStudy({
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.12 });
   const prefersReducedMotion = useReducedMotion();
-  const slideX = project.reversed ? 48 : -48;
+  const isMobile = useIsMobile();
+  // Smaller slide on mobile avoids horizontal overflow flashes
+  const slideX = project.reversed
+    ? (isMobile ? 20 : 48)
+    : (isMobile ? -20 : -48);
 
   return (
     <article

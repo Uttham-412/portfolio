@@ -302,3 +302,34 @@
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
+
+/* ─── Mobile ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Larger tap target for hamburger */
+  .menuToggle {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Each mobile nav link gets a full-width tap area */
+  .mobileLink {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+  }
+
+  /* Resume button in panel — full-width, easy to tap */
+  .mobileResume {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Disable hover slide-in effect on touch screens */
+  .mobileLink:hover {
+    padding-left: 0;
+  }
+}
