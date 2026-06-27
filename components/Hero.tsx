@@ -105,9 +105,7 @@ const actionsVariants: Variants = {
 const TITLE_WORDS = ["Uttham", "Poojary"];
 
 const DESCRIPTION_LINES = [
-  "Building modern full-stack applications powered by Artificial Intelligence.",
-  "I build scalable web applications using React, FastAPI, Node.js, and AI technologies.",
-  "I enjoy solving real-world problems through intelligent software, modern user experiences, and clean engineering.",
+  "Full-Stack Developer and AI enthusiast passionate about building intelligent, scalable, and impactful digital experiences that solve real-world problems through modern technology.",
 ];
 
 export default function Hero() {
