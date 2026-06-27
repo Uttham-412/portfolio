@@ -6,6 +6,7 @@ import {
   type Transition,
   type Variants,
 } from "framer-motion";
+import Image from "next/image";
 import HeroCodeBackground from "@/components/HeroCodeBackground";
 import MagneticButton from "@/components/ui/MagneticButton";
 import styles from "./Hero.module.css";
@@ -27,14 +28,12 @@ const revealVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 24,
-    filter: "blur(8px)",
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.9,
+      duration: 0.75,
       ease: EASE,
     },
   },
@@ -247,23 +246,14 @@ export default function Hero() {
                 aria-hidden
               />
               <div className={styles.profileInner}>
-                <div className={styles.profilePlaceholder} aria-label="Profile photo placeholder">
-                  <svg
-                    className={styles.profilePlaceholderIcon}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden
-                  >
-                    <circle cx="12" cy="8.5" r="3.5" stroke="currentColor" strokeWidth="1.25" />
-                    <path
-                      d="M5 19.5c0-3.038 3.134-5.5 7-5.5s7 2.462 7 5.5"
-                      stroke="currentColor"
-                      strokeWidth="1.25"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span className={styles.profilePlaceholderLabel}>Your photo</span>
-                </div>
+                <Image
+                  src="/profile.png"
+                  alt="Uttham Poojary"
+                  fill
+                  sizes="(max-width: 768px) 30vw, 176px"
+                  className={styles.profileImage}
+                  priority
+                />
               </div>
             </div>
           </motion.div>

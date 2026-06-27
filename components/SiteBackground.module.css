@@ -5,6 +5,8 @@
   pointer-events: none;
   overflow: hidden;
   background: #080808;
+  /* Isolate compositing layer for the entire background */
+  contain: strict;
 }
 
 .base {
@@ -27,8 +29,11 @@
 .aurora {
   position: absolute;
   inset: -40%;
+  /* Single blur on the container — cheaper than per-band filters */
   filter: blur(100px);
   opacity: 0.95;
+  /* Contain within the aurora layer */
+  contain: layout style;
 }
 
 .auroraBand1,
@@ -39,7 +44,7 @@
   inset: 0;
   border-radius: 50%;
   mix-blend-mode: screen;
-  will-change: transform, opacity;
+  /* Use will-change only on the composited container, not each band */
 }
 
 .auroraBand1 {
@@ -125,6 +130,8 @@
   inset: 0;
   z-index: 2;
   opacity: 1;
+  /* Promote to its own layer so updates don't repaint the rest */
+  will-change: background;
 }
 
 .particles {
@@ -151,13 +158,14 @@
 .orbs {
   position: absolute;
   inset: 0;
+  /* Promote orbs container to its own GPU layer */
+  will-change: transform;
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  will-change: transform;
 }
 
 .orb1 {
@@ -351,6 +359,24 @@
   }
   100% {
     transform: translate(-4%, -4%);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Reduce heavy blur filters on mobile to improve GPU performance */
+  .aurora {
+    filter: blur(70px);
+    opacity: 0.7;
+  }
+  .orb {
+    filter: blur(70px);
+  }
+  /* Disable grid drift animation on mobile — saves a compositor layer */
+  .grid {
+    animation: none;
+  }
+  .gridGlow {
+    animation: none;
   }
 }
 

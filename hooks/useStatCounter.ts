@@ -17,20 +17,26 @@ export function useStatCounter(target: number) {
           if (entry.isIntersecting && !animated.current) {
             animated.current = true;
             const duration = 2500;
-            const stepTime = 30;
-            const steps = duration / stepTime;
-            const increment = target / steps;
-            let current = 0;
+            const startTime = performance.now();
+            let rafId = 0;
 
-            const timer = setInterval(() => {
-              current += increment;
-              if (current >= target) {
-                setValue(target);
-                clearInterval(timer);
+            const tick = (now: number) => {
+              const elapsed = Math.min(now - startTime, duration);
+              // Ease-out cubic
+              const progress = 1 - Math.pow(1 - elapsed / duration, 3);
+              const current = Math.floor(progress * target);
+              setValue(current);
+              if (elapsed < duration) {
+                rafId = requestAnimationFrame(tick);
               } else {
-                setValue(Math.floor(current));
+                setValue(target);
               }
-            }, stepTime);
+            };
+
+            rafId = requestAnimationFrame(tick);
+
+            // Cleanup if component unmounts mid-animation
+            return () => cancelAnimationFrame(rafId);
           }
         });
       },

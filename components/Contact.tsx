@@ -48,7 +48,7 @@ const contactDetails = [
     icon: "description",
     label: "Resume",
     value: "Download Resume",
-    href: "/Uttham_Poojary_Resume.pdf",
+    href: "/Uttham_Resume.pdf",
     download: true,
   },
 ];

@@ -8,7 +8,7 @@ import {
   type Transition,
   type Variants,
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import TiltCard from "@/components/ui/TiltCard";
 import styles from "./About.module.css";
 
@@ -27,14 +27,12 @@ const fadeUpVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 28,
-    filter: "blur(4px)",
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.85,
+      duration: 0.75,
       ease: EASE,
     },
   },
@@ -100,7 +98,7 @@ function useAnimatedStat(
   return { ref, display };
 }
 
-function StatCard({ stat }: { stat: (typeof stats)[number] }) {
+const StatCard = memo(function StatCard({ stat }: { stat: (typeof stats)[number] }) {
   return (
     <AnimatedStatCard
       icon={stat.icon}
@@ -110,9 +108,9 @@ function StatCard({ stat }: { stat: (typeof stats)[number] }) {
       suffix={stat.suffix ?? ""}
     />
   );
-}
+});
 
-function AnimatedStatCard({
+const AnimatedStatCard = memo(function AnimatedStatCard({
   icon,
   label,
   target,
@@ -146,7 +144,7 @@ function AnimatedStatCard({
       <p className={styles.statLabel}>{label}</p>
     </TiltCard>
   );
-}
+})
 
 export default function About() {
   const prefersReducedMotion = useReducedMotion();

@@ -59,12 +59,12 @@ const timelineItems = [
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
 
 const headerVariants: Variants = {
-  hidden: { opacity: 0, y: 24, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.85, ease: EASE },
+    transition: { duration: 0.75, ease: EASE },
   },
 };
 
@@ -134,14 +134,14 @@ function TimelineEntry({
         initial={
           prefersReducedMotion
             ? false
-            : { opacity: 0, x: slideFrom, y: 28, filter: "blur(6px)" }
+            : { opacity: 0, x: slideFrom, y: 24 }
         }
         animate={
           isInView
-            ? { opacity: 1, x: 0, y: 0, filter: "blur(0px)" }
-            : { opacity: 0, x: slideFrom, y: 28, filter: "blur(6px)" }
+            ? { opacity: 1, x: 0, y: 0 }
+            : { opacity: 0, x: slideFrom, y: 24 }
         }
-        transition={{ duration: 0.9, ease: EASE }}
+        transition={{ duration: 0.75, ease: EASE }}
       >
         <TimelineCard
           step={item.step}
@@ -185,14 +185,14 @@ function PresentEntry() {
         initial={
           prefersReducedMotion
             ? false
-            : { opacity: 0, x: -56, y: 28, filter: "blur(6px)" }
+            : { opacity: 0, x: -56, y: 24 }
         }
         animate={
           isInView
-            ? { opacity: 1, x: 0, y: 0, filter: "blur(0px)" }
-            : { opacity: 0, x: -56, y: 28, filter: "blur(6px)" }
+            ? { opacity: 1, x: 0, y: 0 }
+            : { opacity: 0, x: -56, y: 24 }
         }
-        transition={{ duration: 0.9, ease: EASE }}
+        transition={{ duration: 0.75, ease: EASE }}
       >
         <TimelineCard
           step="Current Focus"

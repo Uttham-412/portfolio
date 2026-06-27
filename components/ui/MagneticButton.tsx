@@ -5,7 +5,7 @@ import {
   useReducedMotion,
   type HTMLMotionProps,
 } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
 import { useMouse } from "@/context/MouseContext";
 
 type BaseProps = {
@@ -18,20 +18,35 @@ function useMagneticHandlers(strength: number) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { isPointerFine } = useMouse();
+  const rafRef = useRef<number>(0);
 
-  const handleMove = (event: React.MouseEvent) => {
-    const element = ref.current;
-    if (prefersReducedMotion || !isPointerFine || !element) return;
-    const rect = element.getBoundingClientRect();
-    const x = (event.clientX - rect.left - rect.width / 2) * strength;
-    const y = (event.clientY - rect.top - rect.height / 2) * strength;
-    element.style.transform = `translate(${x}px, ${y}px)`;
-  };
+  const handleMove = useCallback(
+    (event: React.MouseEvent) => {
+      const element = ref.current;
+      if (prefersReducedMotion || !isPointerFine || !element) return;
+      // Throttle to one DOM write per animation frame
+      if (rafRef.current) return;
+      const clientX = event.clientX;
+      const clientY = event.clientY;
+      rafRef.current = requestAnimationFrame(() => {
+        const rect = element.getBoundingClientRect();
+        const x = (clientX - rect.left - rect.width / 2) * strength;
+        const y = (clientY - rect.top - rect.height / 2) * strength;
+        element.style.transform = `translate(${x}px, ${y}px)`;
+        rafRef.current = 0;
+      });
+    },
+    [prefersReducedMotion, isPointerFine, strength],
+  );
 
-  const handleLeave = () => {
+  const handleLeave = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
     if (!ref.current) return;
     ref.current.style.transform = "";
-  };
+  }, []);
 
   return { ref, handleMove, handleLeave, prefersReducedMotion };
 }

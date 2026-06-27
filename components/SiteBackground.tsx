@@ -24,27 +24,33 @@ function FloatingParticles() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let animationId = 0;
+    let paused = false;
     let particles: Particle[] = [];
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      const count = Math.min(48, Math.floor(window.innerWidth / 40));
+      // Reduce particle count: max 32 on desktop, fewer on mobile
+      const count = Math.min(32, Math.floor(window.innerWidth / 55));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 1.4 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.18,
-        speedY: (Math.random() - 0.5) * 0.18,
-        opacity: Math.random() * 0.35 + 0.08,
+        size: Math.random() * 1.2 + 0.4,
+        speedX: (Math.random() - 0.5) * 0.15,
+        speedY: (Math.random() - 0.5) * 0.15,
+        opacity: Math.random() * 0.3 + 0.07,
       }));
     };
 
     const draw = () => {
+      if (paused) {
+        animationId = requestAnimationFrame(draw);
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (const particle of particles) {
@@ -58,20 +64,35 @@ function FloatingParticles() {
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(255,255,255,${particle.opacity})`;
         ctx.fill();
       }
 
       animationId = requestAnimationFrame(draw);
     };
 
+    // Pause canvas loop when tab is hidden to save GPU/CPU
+    const handleVisibility = () => {
+      paused = document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Debounce resize to avoid thrashing
+    let resizeTimer = 0;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 150);
+    };
+
     resize();
     draw();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      clearTimeout(resizeTimer);
     };
   }, [prefersReducedMotion]);
 

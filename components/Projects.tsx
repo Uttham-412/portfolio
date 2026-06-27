@@ -16,12 +16,11 @@ import styles from "./Projects.module.css";
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
 
 const fadeUpVariants: Variants = {
-  hidden: { opacity: 0, y: 32, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.85, ease: EASE },
+    transition: { duration: 0.75, ease: EASE },
   },
 };
 
@@ -191,14 +190,14 @@ function CaseStudy({
             initial={
               prefersReducedMotion
                 ? false
-                : { opacity: 0, x: slideX, y: 24, filter: "blur(6px)" }
+                : { opacity: 0, x: slideX, y: 20 }
             }
             animate={
               isInView
-                ? { opacity: 1, x: 0, y: 0, filter: "blur(0px)" }
-                : { opacity: 0, x: slideX, y: 24, filter: "blur(6px)" }
+                ? { opacity: 1, x: 0, y: 0 }
+                : { opacity: 0, x: slideX, y: 20 }
             }
-            transition={{ duration: 0.9, ease: EASE, delay: 0.08 }}
+            transition={{ duration: 0.75, ease: EASE, delay: 0.08 }}
           >
             <span
               className={`${styles.badge} ${

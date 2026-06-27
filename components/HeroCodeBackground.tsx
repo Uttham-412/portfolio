@@ -425,7 +425,8 @@ function FloatingSnippet({
         className={styles.snippet}
         style={{
           rotate: instance.rotate,
-          filter: `blur(${instance.blur}px)`,
+          // Clamp blur to 0.5px max — still gives depth without heavy GPU cost
+          filter: instance.blur > 0.5 ? `blur(0.5px)` : undefined,
         }}
         initial={{ opacity: 0 }}
         animate={

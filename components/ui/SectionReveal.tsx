@@ -22,18 +22,17 @@ const containerVariants: Variants = {
   },
 };
 
+// Animate only transform + opacity — no blur, no layout triggers
 const itemVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 32,
-    filter: "blur(6px)",
+    y: 28,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.85,
+      duration: 0.75,
       ease: EASE,
     },
   },

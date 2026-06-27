@@ -139,6 +139,17 @@ body {
   isolation: isolate;
 }
 
+/* Skip rendering off-screen sections to speed up initial paint */
+#about,
+#experience,
+#skills,
+#projects,
+#contact {
+  content-visibility: auto;
+  /* Provide a size hint to avoid layout shifts when section becomes visible */
+  contain-intrinsic-size: 0 800px;
+}
+
 #hero::before {
   content: "";
   position: absolute;
@@ -337,6 +348,8 @@ body {
   transform-style: preserve-3d;
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  /* Prevent tilt 3D transforms from affecting surrounding layout */
+  contain: layout;
 }
 
 .tilt-card-glare::before {

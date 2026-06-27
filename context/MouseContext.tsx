@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -41,6 +42,9 @@ export function MouseProvider({ children }: { children: ReactNode }) {
     y.set(window.innerHeight * 0.38);
   }, [x, y]);
 
+  // RAF ref for throttling mousemove — keeps listener cost near zero
+  const rafRef = useRef<number>(0);
+
   useEffect(() => {
     const media = window.matchMedia("(pointer: fine)");
     const updatePointer = () => setIsPointerFine(media.matches);
@@ -51,8 +55,13 @@ export function MouseProvider({ children }: { children: ReactNode }) {
 
     const onMove = (event: MouseEvent) => {
       if (!media.matches || prefersReducedMotion) return;
-      x.set(event.clientX);
-      y.set(event.clientY);
+      // Throttle to one update per animation frame
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        x.set(event.clientX);
+        y.set(event.clientY);
+        rafRef.current = 0;
+      });
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -62,6 +71,7 @@ export function MouseProvider({ children }: { children: ReactNode }) {
       media.removeEventListener("change", updatePointer);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("resize", centerPointer);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [centerPointer, prefersReducedMotion, x, y]);
 

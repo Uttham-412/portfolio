@@ -105,9 +105,15 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <MagneticButton href="#" className={styles.resumeBtn} strength={0.22}>
+            <a
+              href="/Uttham_Resume.pdf"
+              download="Uttham_Poojary_Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.resumeBtn}
+            >
               Download Resume
-            </MagneticButton>
+            </a>
           </div>
 
           <button
@@ -178,7 +184,10 @@ export default function Navbar() {
                 </motion.a>
               ))}
               <motion.a
-                href="#"
+                href="/Uttham_Resume.pdf"
+                download="Uttham_Poojary_Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 custom={navLinks.length}
                 variants={linkVariants}
                 initial="hidden"

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   motion,
   useInView,
@@ -128,9 +129,13 @@ export default function Skills() {
             <RevealItem>
               <TiltCard className="glass-card-skills p-1 rounded-xl md:col-span-2 overflow-hidden relative group cursor-pointer h-[260px]">
                 <div className="relative w-full h-full rounded-lg overflow-hidden bg-surface-container-low">
-                  <div
-                    className="bg-cover bg-center w-full h-full opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-1000"
-                    style={{ backgroundImage: `url('${ARCHITECTURE_IMAGE}')` }}
+                  <Image
+                    src={ARCHITECTURE_IMAGE}
+                    alt="Advanced System Architecture diagram"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover opacity-30 group-hover:opacity-40 group-hover:scale-105 transition-all duration-1000"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent p-10 flex flex-col justify-end">
                     <h4 className="font-headline-md text-[28px] font-bold text-primary tracking-tight">
