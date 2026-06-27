@@ -349,17 +349,18 @@
   grid-template-columns: 1fr;
   gap: clamp(1.25rem, 3vw, 2rem);
   margin-top: clamp(4rem, 10vw, var(--spacing-section-gap));
+  align-items: stretch;
 }
 
 @media (min-width: 640px) {
   .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .statsGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2rem;
   }
 }
@@ -370,6 +371,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  height: 100%;
+  min-height: clamp(16rem, 28vw, 18.5rem);
   padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 4vw, 2rem);
   border-radius: 2rem;
 }
@@ -392,10 +395,20 @@
   color: var(--color-outline);
 }
 
+.statNumberSlot {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: clamp(4.5rem, 12vw, 6.25rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+
 .statNumber {
   position: relative;
   z-index: 1;
-  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  margin-bottom: 0;
   font-family: var(--font-geist-sans), sans-serif;
   font-size: clamp(4rem, 12vw, 6.25rem);
   font-weight: 700;
@@ -405,24 +418,17 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
 }
 
 .statLabel {
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
   font-family: var(--font-label-sm);
   font-size: 0.6875rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--color-outline);
   max-width: 12rem;
-}
-
-@media (min-width: 640px) and (max-width: 1023px) {
-  .statsGrid > :last-child {
-    grid-column: 1 / -1;
-    max-width: 24rem;
-    margin-inline: auto;
-    width: 100%;
-  }
 }

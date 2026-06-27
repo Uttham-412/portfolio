@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { motion, useTransform } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMouse } from "@/context/MouseContext";
 import styles from "./HeroCodeBackground.module.css";
 
 type TokenClass = "kw" | "ty" | "str" | "fn" | "cm" | "op" | "num" | "plain";
@@ -9,257 +10,178 @@ type TokenClass = "kw" | "ty" | "str" | "fn" | "cm" | "op" | "num" | "plain";
 type Token = {
   text: string;
   className?: TokenClass;
-  highlight?: boolean;
 };
 
 type CodeLine = Token[];
 
-type SnippetConfig = {
+type SnippetTemplate = {
   id: string;
-  top?: string;
-  left?: string;
-  right?: string;
-  bottom?: string;
-  fontSize: number;
-  baseOpacity: number;
-  blur: number;
-  rotate: number;
-  floatDuration: number;
-  floatDelay: number;
-  driftY: number;
+  tech: string;
   lines: CodeLine[];
-  typingLineIndex?: number;
-  showCursor?: boolean;
-  particles?: boolean;
-  hideBelow?: "md" | "sm";
+  typingLines: number[];
 };
 
-const CODE_SNIPPETS: SnippetConfig[] = [
+type SnippetInstance = {
+  instanceId: string;
+  template: SnippetTemplate;
+  x: number;
+  y: number;
+  rotate: number;
+  floatDuration: number;
+  driftY: number;
+  parallaxFactor: number;
+  baseOpacity: number;
+  blur: number;
+  spawnDelay: number;
+};
+
+const MAX_SNIPPETS = 5;
+const EDGE_MARGIN = 11;
+const EXCLUSION = { cx: 50, cy: 46, rx: 24, ry: 30 };
+const MIN_SNIPPET_DISTANCE = 14;
+
+const SNIPPET_TEMPLATES: SnippetTemplate[] = [
   {
-    id: "pytorch",
-    top: "7%",
-    left: "2%",
-    fontSize: 11,
-    baseOpacity: 0.09,
-    blur: 0.6,
-    rotate: -2,
-    floatDuration: 28,
-    floatDelay: 0,
-    driftY: 18,
-    showCursor: true,
-    particles: true,
-    lines: [
-      [{ text: "import ", className: "kw" }, { text: "torch", className: "fn" }],
-      [{ text: "import ", className: "kw" }, { text: "torch.nn", className: "fn" }, { text: " as ", className: "kw" }, { text: "nn", className: "ty" }],
-      [],
-      [{ text: "class ", className: "kw" }, { text: "CareerPathModel", className: "ty" }, { text: "(", className: "plain" }, { text: "nn.Module", className: "ty" }, { text: "):", className: "plain" }],
-      [{ text: "  def ", className: "kw" }, { text: "__init__", className: "fn" }, { text: "(", className: "plain" }, { text: "self", className: "kw" }, { text: ", dim):", className: "plain" }],
-      [{ text: "    self.encoder = ", className: "plain" }, { text: "nn.Linear", className: "fn" }, { text: "(dim, ", className: "plain" }, { text: "512", className: "num" }, { text: ")", className: "plain" }],
-      [{ text: "    self.head = ", className: "plain" }, { text: "nn.Sequential", className: "fn" }, { text: "(", className: "plain" }],
-      [{ text: "      nn.ReLU(), ", className: "plain" }, { text: "nn.Linear", className: "fn" }, { text: "(", className: "plain" }, { text: "512", className: "num" }, { text: ", ", className: "plain" }, { text: "128", className: "num" }, { text: "))", className: "plain" }],
-      [],
-      [{ text: "  def ", className: "kw" }, { text: "forward", className: "fn" }, { text: "(", className: "plain" }, { text: "self", className: "kw" }, { text: ", x):", className: "plain" }],
-      [{ text: "    z = ", className: "plain" }, { text: "self.encoder", className: "fn" }, { text: "(x)", className: "plain" }],
-      [{ text: "    return ", className: "kw" }, { text: "self.head", className: "fn" }, { text: "(z)", className: "plain" }],
-    ],
-  },
-  {
-    id: "react",
-    top: "10%",
-    right: "1.5%",
-    fontSize: 10,
-    baseOpacity: 0.08,
-    blur: 0.4,
-    rotate: 1.5,
-    floatDuration: 32,
-    floatDelay: 2,
-    driftY: 14,
-    typingLineIndex: 8,
+    id: "react-1",
+    tech: "React",
+    typingLines: [3],
     lines: [
       [{ text: "'use client'", className: "str" }, { text: ";", className: "plain" }],
-      [],
       [{ text: "import ", className: "kw" }, { text: "{ useMemo }", className: "plain" }, { text: " from ", className: "kw" }, { text: "'react'", className: "str" }],
-      [{ text: "import ", className: "kw" }, { text: "type ", className: "kw" }, { text: "{ Project }", className: "ty" }, { text: " from ", className: "kw" }, { text: "'@/types'", className: "str" }],
       [],
-      [{ text: "export function ", className: "kw" }, { text: "ProjectCard", className: "fn" }, { text: "({", className: "plain" }],
-      [{ text: "  project,", className: "plain" }],
-      [{ text: "}: { project: ", className: "plain" }, { text: "Project", className: "ty" }, { text: " }) {", className: "plain" }],
+      [{ text: "export function ", className: "kw" }, { text: "ProjectCard", className: "fn" }, { text: "({ project }) {", className: "plain" }],
       [{ text: "  const ", className: "kw" }, { text: "tags", className: "plain" }, { text: " = ", className: "op" }, { text: "useMemo", className: "fn" }, { text: "(() =>", className: "plain" }],
       [{ text: "    project.stack.filter(Boolean)", className: "plain" }],
-      [{ text: "  , [project]);", className: "plain" }],
-      [],
-      [{ text: "  return (", className: "kw" }],
-      [{ text: "    <article className=", className: "plain" }, { text: "'glass-card'", className: "str" }, { text: ">", className: "plain" }],
-      [{ text: "      <h3>{project.name}</h3>", className: "plain" }],
-      [{ text: "    </article>", className: "plain" }],
-      [{ text: "  );", className: "plain" }],
-      [{ text: "}", className: "plain" }],
     ],
   },
   {
-    id: "fastapi",
-    top: "36%",
-    left: "0.5%",
-    fontSize: 10,
-    baseOpacity: 0.07,
-    blur: 1.2,
-    rotate: -1,
-    floatDuration: 36,
-    floatDelay: 1,
-    driftY: 22,
+    id: "react-2",
+    tech: "React",
+    typingLines: [2, 3],
     lines: [
-      [{ text: "from ", className: "kw" }, { text: "fastapi", className: "fn" }, { text: " import ", className: "kw" }, { text: "FastAPI", className: "ty" }],
-      [{ text: "from ", className: "kw" }, { text: "pydantic", className: "fn" }, { text: " import ", className: "kw" }, { text: "BaseModel", className: "ty" }],
+      [{ text: "const ", className: "kw" }, { text: "[open, setOpen]", className: "plain" }, { text: " = ", className: "op" }, { text: "useState", className: "fn" }, { text: "(", className: "plain" }, { text: "false", className: "kw" }, { text: ");", className: "plain" }],
       [],
-      [{ text: "app = ", className: "plain" }, { text: "FastAPI", className: "ty" }, { text: "()", className: "plain" }],
-      [],
-      [{ text: "class ", className: "kw" }, { text: "InferenceRequest", className: "ty" }, { text: "(", className: "plain" }, { text: "BaseModel", className: "ty" }, { text: "):", className: "plain" }],
-      [{ text: "  prompt: ", className: "plain" }, { text: "str", className: "ty" }],
-      [{ text: "  temperature: ", className: "plain" }, { text: "float", className: "ty" }, { text: " = ", className: "op" }, { text: "0.2", className: "num" }],
-      [],
-      [{ text: "@app.post", className: "fn" }, { text: "(", className: "plain" }, { text: "'/predict'", className: "str" }, { text: ")", className: "plain" }],
-      [{ text: "async def ", className: "kw" }, { text: "predict", className: "fn", highlight: true }, { text: "(body: ", className: "plain" }, { text: "InferenceRequest", className: "ty" }, { text: "):", className: "plain" }],
-      [{ text: "  embedding = ", className: "plain" }, { text: "await", className: "kw" }, { text: " encode(body.prompt)", className: "plain" }],
-      [{ text: "  return ", className: "kw" }, { text: "{ ", className: "plain" }, { text: "'vector'", className: "str" }, { text: ": embedding }", className: "plain" }],
+      [{ text: "return (", className: "kw" }],
+      [{ text: "  <button onClick={() => setOpen(v => !v)}>", className: "plain" }],
+      [{ text: "    {open ? ", className: "plain" }, { text: "'Close'", className: "str" }, { text: " : ", className: "plain" }, { text: "'Open'", className: "str" }, { text: "}", className: "plain" }],
+      [{ text: "  </button>", className: "plain" }],
     ],
   },
   {
-    id: "mongodb",
-    top: "34%",
-    right: "0.5%",
-    fontSize: 11,
-    baseOpacity: 0.1,
-    blur: 0.5,
-    rotate: 2,
-    floatDuration: 30,
-    floatDelay: 3,
-    driftY: 16,
-    showCursor: true,
-    particles: true,
-    lines: [
-      [{ text: "// MongoDB aggregation pipeline", className: "cm" }],
-      [{ text: "db.projects.aggregate([", className: "plain" }],
-      [{ text: "  { ", className: "plain" }, { text: "$match", className: "fn" }, { text: ": { status: ", className: "plain" }, { text: "'active'", className: "str" }, { text: " } },", className: "plain" }],
-      [{ text: "  { ", className: "plain" }, { text: "$lookup", className: "fn" }, { text: ": {", className: "plain" }],
-      [{ text: "      from: ", className: "plain" }, { text: "'skills'", className: "str" }, { text: ",", className: "plain" }],
-      [{ text: "      localField: ", className: "plain" }, { text: "'stack'", className: "str" }, { text: ",", className: "plain" }],
-      [{ text: "      foreignField: ", className: "plain" }, { text: "'name'", className: "str" }, { text: ",", className: "plain" }],
-      [{ text: "      as: ", className: "plain" }, { text: "'matchedSkills'", className: "str" }],
-      [{ text: "  }},", className: "plain" }],
-      [{ text: "  { ", className: "plain" }, { text: "$project", className: "fn" }, { text: ": {", className: "plain" }],
-      [{ text: "      name: ", className: "plain" }, { text: "1", className: "num" }, { text: ",", className: "plain" }],
-      [{ text: "      score: { ", className: "plain" }, { text: "$size", className: "fn" }, { text: ": ", className: "plain" }, { text: "'$matchedSkills'", className: "str" }, { text: " }", className: "plain" }],
-      [{ text: "  }}", className: "plain" }],
-      [{ text: "]);", className: "plain" }],
-    ],
-  },
-  {
-    id: "tensorflow",
-    bottom: "20%",
-    left: "2%",
-    fontSize: 10,
-    baseOpacity: 0.06,
-    blur: 1.4,
-    rotate: 1,
-    floatDuration: 34,
-    floatDelay: 4,
-    driftY: 20,
-    lines: [
-      [{ text: "import ", className: "kw" }, { text: "tensorflow", className: "fn" }, { text: " as ", className: "kw" }, { text: "tf", className: "ty" }],
-      [],
-      [{ text: "model = ", className: "plain" }, { text: "tf.keras.Sequential", className: "fn" }, { text: "([", className: "plain" }],
-      [{ text: "  tf.keras.layers.Dense(", className: "plain" }, { text: "256", className: "num" }, { text: ", activation=", className: "plain" }, { text: "'relu'", className: "str" }, { text: "),", className: "plain" }],
-      [{ text: "  tf.keras.layers.Dropout(", className: "plain" }, { text: "0.3", className: "num" }, { text: "),", className: "plain" }],
-      [{ text: "  tf.keras.layers.Dense(", className: "plain" }, { text: "64", className: "num" }, { text: ", activation=", className: "plain" }, { text: "'relu'", className: "str" }, { text: "),", className: "plain" }],
-      [{ text: "  tf.keras.layers.Dense(", className: "plain" }, { text: "1", className: "num" }, { text: ", activation=", className: "plain" }, { text: "'sigmoid'", className: "str" }, { text: ")", className: "plain" }],
-      [{ text: "])", className: "plain" }],
-      [],
-      [{ text: "model.compile(", className: "plain" }],
-      [{ text: "  optimizer=", className: "plain" }, { text: "tf.keras.optimizers.Adam", className: "fn", highlight: true }, { text: "(", className: "plain" }, { text: "1e-3", className: "num" }, { text: "),", className: "plain" }],
-      [{ text: "  loss=", className: "plain" }, { text: "'binary_crossentropy'", className: "str" }],
-      [{ text: ")", className: "plain" }],
-    ],
-  },
-  {
-    id: "langchain",
-    bottom: "16%",
-    right: "2%",
-    fontSize: 11,
-    baseOpacity: 0.08,
-    blur: 0.8,
-    rotate: -1.5,
-    floatDuration: 26,
-    floatDelay: 1.5,
-    driftY: 12,
-    typingLineIndex: 5,
-    lines: [
-      [{ text: "from ", className: "kw" }, { text: "langchain_openai", className: "fn" }, { text: " import ", className: "kw" }, { text: "ChatOpenAI", className: "ty" }],
-      [{ text: "from ", className: "kw" }, { text: "langchain.chains", className: "fn" }, { text: " import ", className: "kw" }, { text: "RetrievalQA", className: "ty" }],
-      [],
-      [{ text: "llm = ", className: "plain" }, { text: "ChatOpenAI", className: "ty" }, { text: "(model=", className: "plain" }, { text: "'gpt-4o-mini'", className: "str" }, { text: ")", className: "plain" }],
-      [{ text: "retriever = ", className: "plain" }, { text: "vector_store", className: "fn" }, { text: ".as_retriever(k=", className: "plain" }, { text: "6", className: "num" }, { text: ")", className: "plain" }],
-      [],
-      [{ text: "chain = ", className: "plain" }, { text: "RetrievalQA", className: "ty" }, { text: ".from_chain_type(", className: "plain" }],
-      [{ text: "  llm=llm,", className: "plain" }],
-      [{ text: "  retriever=retriever,", className: "plain" }],
-      [{ text: "  chain_type=", className: "plain" }, { text: "'stuff'", className: "str" }],
-      [{ text: ")", className: "plain" }],
-      [],
-      [{ text: "answer = ", className: "plain" }, { text: "chain.invoke", className: "fn" }, { text: "({ ", className: "plain" }, { text: "'query'", className: "str" }, { text: ": user_prompt })", className: "plain" }],
-    ],
-  },
-  {
-    id: "typescript",
-    top: "62%",
-    left: "3%",
-    fontSize: 10,
-    baseOpacity: 0.07,
-    blur: 1,
-    rotate: 2.5,
-    floatDuration: 38,
-    floatDelay: 2.5,
-    driftY: 24,
-    hideBelow: "md",
+    id: "typescript-1",
+    tech: "TypeScript",
+    typingLines: [1],
     lines: [
       [{ text: "type ", className: "kw" }, { text: "SkillVector", className: "ty" }, { text: " = {", className: "plain" }],
       [{ text: "  name: ", className: "plain" }, { text: "string", className: "ty" }, { text: ";", className: "plain" }],
       [{ text: "  weight: ", className: "plain" }, { text: "number", className: "ty" }, { text: ";", className: "plain" }],
       [{ text: "};", className: "plain" }],
-      [],
-      [{ text: "async function ", className: "kw" }, { text: "rankCandidates", className: "fn", highlight: true }, { text: "(", className: "plain" }],
-      [{ text: "  skills: ", className: "plain" }, { text: "SkillVector", className: "ty" }, { text: "[]", className: "plain" }],
-      [{ text: "): ", className: "plain" }, { text: "Promise", className: "ty" }, { text: "<number[]> {", className: "plain" }],
-      [{ text: "  return ", className: "kw" }, { text: "skills", className: "plain" }],
-      [{ text: "    .map(s => s.weight)", className: "plain" }],
-      [{ text: "    .sort((a, b) => b - a);", className: "plain" }],
-      [{ text: "}", className: "plain" }],
     ],
   },
   {
-    id: "ml-algo",
-    bottom: "8%",
-    right: "3%",
-    fontSize: 10,
-    baseOpacity: 0.09,
-    blur: 0.3,
-    rotate: -2.5,
-    floatDuration: 29,
-    floatDelay: 0.8,
-    driftY: 15,
-    hideBelow: "sm",
-    showCursor: true,
+    id: "typescript-2",
+    tech: "TypeScript",
+    typingLines: [2],
     lines: [
-      [{ text: "# cosine similarity — RAG retrieval", className: "cm" }],
-      [{ text: "def ", className: "kw" }, { text: "cosine_sim", className: "fn" }, { text: "(a, b):", className: "plain" }],
-      [{ text: "  dot = ", className: "plain" }, { text: "np.dot", className: "fn" }, { text: "(a, b)", className: "plain" }],
-      [{ text: "  norm = ", className: "plain" }, { text: "np.linalg.norm", className: "fn" }, { text: "(a) * ", className: "plain" }, { text: "np.linalg.norm", className: "fn" }, { text: "(b)", className: "plain" }],
-      [{ text: "  return ", className: "kw" }, { text: "dot / ", className: "plain" }, { text: "max", className: "fn" }, { text: "(norm, ", className: "plain" }, { text: "1e-9", className: "num" }, { text: ")", className: "plain" }],
+      [{ text: "interface ", className: "kw" }, { text: "ApiResponse", className: "ty" }, { text: "<T> {", className: "plain" }],
+      [{ text: "  data: ", className: "plain" }, { text: "T", className: "ty" }, { text: ";", className: "plain" }],
+      [{ text: "  status: ", className: "plain" }, { text: "number", className: "ty" }, { text: ";", className: "plain" }],
+      [{ text: "}", className: "plain" }],
       [],
-      [{ text: "scores = [", className: "plain" }],
-      [{ text: "  cosine_sim(query_vec, doc)", className: "plain" }],
-      [{ text: "  for doc in ", className: "kw" }, { text: "corpus_embeddings", className: "fn", highlight: true }],
-      [{ text: "]", className: "plain" }],
-      [{ text: "top_k = ", className: "plain" }, { text: "np.argsort", className: "fn" }, { text: "(scores)[::-", className: "plain" }, { text: "1", className: "num" }, { text: "][:", className: "plain" }, { text: "5", className: "num" }, { text: "]", className: "plain" }],
+      [{ text: "const ", className: "kw" }, { text: "res", className: "plain" }, { text: ": ", className: "op" }, { text: "ApiResponse", className: "ty" }, { text: "<User>", className: "plain" }],
+    ],
+  },
+  {
+    id: "python-1",
+    tech: "Python",
+    typingLines: [1, 2],
+    lines: [
+      [{ text: "def ", className: "kw" }, { text: "embed_text", className: "fn" }, { text: "(text: ", className: "plain" }, { text: "str", className: "ty" }, { text: ") -> ", className: "plain" }, { text: "np.ndarray", className: "ty" }, { text: ":", className: "plain" }],
+      [{ text: "    vector = ", className: "plain" }, { text: "model.encode", className: "fn" }, { text: "(text)", className: "plain" }],
+      [{ text: "    return ", className: "kw" }, { text: "vector / ", className: "plain" }, { text: "np.linalg.norm", className: "fn" }, { text: "(vector)", className: "plain" }],
+    ],
+  },
+  {
+    id: "python-2",
+    tech: "Python",
+    typingLines: [3],
+    lines: [
+      [{ text: "from ", className: "kw" }, { text: "sklearn.pipeline", className: "fn" }, { text: " import ", className: "kw" }, { text: "Pipeline", className: "ty" }],
+      [],
+      [{ text: "pipe = ", className: "plain" }, { text: "Pipeline", className: "ty" }, { text: "([", className: "plain" }],
+      [{ text: '  ("scale", StandardScaler()),', className: "plain" }],
+      [{ text: '  ("clf", LogisticRegression()),', className: "plain" }],
+      [{ text: "])", className: "plain" }],
+    ],
+  },
+  {
+    id: "fastapi-1",
+    tech: "FastAPI",
+    typingLines: [2, 3],
+    lines: [
+      [{ text: "from ", className: "kw" }, { text: "fastapi", className: "fn" }, { text: " import ", className: "kw" }, { text: "FastAPI", className: "ty" }],
+      [{ text: "app = ", className: "plain" }, { text: "FastAPI", className: "ty" }, { text: "()", className: "plain" }],
+      [],
+      [{ text: "@app.post", className: "fn" }, { text: "(", className: "plain" }, { text: "'/predict'", className: "str" }, { text: ")", className: "plain" }],
+      [{ text: "async def ", className: "kw" }, { text: "predict", className: "fn" }, { text: "(body: ", className: "plain" }, { text: "Request", className: "ty" }, { text: "):", className: "plain" }],
+      [{ text: "  return ", className: "kw" }, { text: "await", className: "kw" }, { text: " model.infer(body)", className: "plain" }],
+    ],
+  },
+  {
+    id: "fastapi-2",
+    tech: "FastAPI",
+    typingLines: [1],
+    lines: [
+      [{ text: "@app.get", className: "fn" }, { text: "(", className: "plain" }, { text: "'/health'", className: "str" }, { text: ")", className: "plain" }],
+      [{ text: "async def ", className: "kw" }, { text: "health", className: "fn" }, { text: "():", className: "plain" }],
+      [{ text: "  return ", className: "kw" }, { text: "{ ", className: "plain" }, { text: '"status"', className: "str" }, { text: ": ", className: "plain" }, { text: '"ok"', className: "str" }, { text: " }", className: "plain" }],
+    ],
+  },
+  {
+    id: "tensorflow-1",
+    tech: "TensorFlow",
+    typingLines: [1],
+    lines: [
+      [{ text: "import ", className: "kw" }, { text: "tensorflow", className: "fn" }, { text: " as ", className: "kw" }, { text: "tf", className: "ty" }],
+      [],
+      [{ text: "model = ", className: "plain" }, { text: "tf.keras.Sequential", className: "fn" }, { text: "([", className: "plain" }],
+      [{ text: "  tf.keras.layers.Dense(", className: "plain" }, { text: "128", className: "num" }, { text: ", activation=", className: "plain" }, { text: "'relu'", className: "str" }, { text: "),", className: "plain" }],
+      [{ text: "  tf.keras.layers.Dropout(", className: "plain" }, { text: "0.2", className: "num" }, { text: "),", className: "plain" }],
+      [{ text: "])", className: "plain" }],
+    ],
+  },
+  {
+    id: "tensorflow-2",
+    tech: "TensorFlow",
+    typingLines: [2],
+    lines: [
+      [{ text: "model.compile(", className: "plain" }],
+      [{ text: "  optimizer=", className: "plain" }, { text: "tf.keras.optimizers.Adam", className: "fn" }, { text: "(", className: "plain" }, { text: "1e-3", className: "num" }, { text: "),", className: "plain" }],
+      [{ text: "  loss=", className: "plain" }, { text: "'binary_crossentropy'", className: "str" }, { text: ",", className: "plain" }],
+      [{ text: "  metrics=[", className: "plain" }, { text: "'accuracy'", className: "str" }, { text: "]", className: "plain" }],
+      [{ text: ")", className: "plain" }],
+    ],
+  },
+  {
+    id: "mongodb-1",
+    tech: "MongoDB",
+    typingLines: [1, 2],
+    lines: [
+      [{ text: "// aggregation pipeline", className: "cm" }],
+      [{ text: "db.projects.aggregate([", className: "plain" }],
+      [{ text: "  { ", className: "plain" }, { text: "$match", className: "fn" }, { text: ": { status: ", className: "plain" }, { text: "'active'", className: "str" }, { text: " } },", className: "plain" }],
+      [{ text: "  { ", className: "plain" }, { text: "$sort", className: "fn" }, { text: ": { score: ", className: "plain" }, { text: "-1", className: "num" }, { text: " } }", className: "plain" }],
+      [{ text: "]);", className: "plain" }],
+    ],
+  },
+  {
+    id: "mongodb-2",
+    tech: "MongoDB",
+    typingLines: [1],
+    lines: [
+      [{ text: "db.users.find({", className: "plain" }],
+      [{ text: "  skills: { ", className: "plain" }, { text: "$in", className: "fn" }, { text: ": [", className: "plain" }, { text: "'React'", className: "str" }, { text: ", ", className: "plain" }, { text: "'Python'", className: "str" }, { text: "] }", className: "plain" }],
+      [{ text: "}).limit(", className: "plain" }, { text: "10", className: "num" }, { text: ");", className: "plain" }],
     ],
   },
 ];
@@ -268,18 +190,112 @@ function lineToText(line: CodeLine) {
   return line.map((token) => token.text).join("");
 }
 
-function CodeToken({
-  token,
-  pulseHighlight,
-}: {
-  token: Token;
-  pulseHighlight: boolean;
-}) {
+function isInExclusionZone(x: number, y: number) {
+  const dx = (x - EXCLUSION.cx) / EXCLUSION.rx;
+  const dy = (y - EXCLUSION.cy) / EXCLUSION.ry;
+  return dx * dx + dy * dy < 1;
+}
+
+function isTooCloseToEdge(x: number, y: number) {
+  return (
+    x < EDGE_MARGIN ||
+    x > 100 - EDGE_MARGIN ||
+    y < EDGE_MARGIN ||
+    y > 100 - EDGE_MARGIN
+  );
+}
+
+function isValidPosition(x: number, y: number, occupied: { x: number; y: number }[]) {
+  if (isTooCloseToEdge(x, y) || isInExclusionZone(x, y)) return false;
+  return !occupied.some((point) => {
+    const dx = x - point.x;
+    const dy = y - point.y;
+    return Math.hypot(dx, dy) < MIN_SNIPPET_DISTANCE;
+  });
+}
+
+function pickRandomPosition(occupied: { x: number; y: number }[]) {
+  const zones = [
+    { xMin: 12, xMax: 26, yMin: 14, yMax: 26 },
+    { xMin: 74, xMax: 88, yMin: 14, yMax: 26 },
+    { xMin: 10, xMax: 22, yMin: 30, yMax: 44 },
+    { xMin: 78, xMax: 90, yMin: 30, yMax: 44 },
+    { xMin: 14, xMax: 28, yMin: 52, yMax: 66 },
+    { xMin: 72, xMax: 86, yMin: 52, yMax: 66 },
+    { xMin: 16, xMax: 30, yMin: 70, yMax: 82 },
+    { xMin: 70, xMax: 84, yMin: 70, yMax: 82 },
+  ];
+
+  const shuffled = [...zones].sort(() => Math.random() - 0.5);
+
+  for (const zone of shuffled) {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const x = zone.xMin + Math.random() * (zone.xMax - zone.xMin);
+      const y = zone.yMin + Math.random() * (zone.yMax - zone.yMin);
+      if (isValidPosition(x, y, occupied)) return { x, y };
+    }
+  }
+
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const x = EDGE_MARGIN + Math.random() * (100 - EDGE_MARGIN * 2);
+    const y = EDGE_MARGIN + Math.random() * (100 - EDGE_MARGIN * 2);
+    if (isValidPosition(x, y, occupied)) return { x, y };
+  }
+
+  return {
+    x: 15 + Math.random() * 70,
+    y: 15 + Math.random() * 70,
+  };
+}
+
+function pickRandomTemplate(excludeIds: string[] = []) {
+  const available = SNIPPET_TEMPLATES.filter((t) => !excludeIds.includes(t.id));
+  const pool = available.length > 0 ? available : SNIPPET_TEMPLATES;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function createSnippetInstance(
+  occupied: { x: number; y: number }[],
+  excludeTemplateIds: string[] = [],
+  spawnDelay = 0,
+): SnippetInstance {
+  const { x, y } = pickRandomPosition(occupied);
+  const template = pickRandomTemplate(excludeTemplateIds);
+
+  return {
+    instanceId: `${template.id}-${Math.random().toString(36).slice(2, 9)}`,
+    template,
+    x,
+    y,
+    rotate: (Math.random() - 0.5) * 4,
+    floatDuration: 22 + Math.random() * 16,
+    driftY: 8 + Math.random() * 14,
+    parallaxFactor: 0.4 + Math.random() * 0.9,
+    baseOpacity: 0.2 + Math.random() * 0.1,
+    blur: 0.4 + Math.random() * 0.6,
+    spawnDelay,
+  };
+}
+
+function createInitialSnippets(count: number): SnippetInstance[] {
+  const snippets: SnippetInstance[] = [];
+  const occupied: { x: number; y: number }[] = [];
+  const usedTemplates: string[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const instance = createSnippetInstance(occupied, usedTemplates, i * 0.9);
+    snippets.push(instance);
+    occupied.push({ x: instance.x, y: instance.y });
+    usedTemplates.push(instance.template.id);
+  }
+
+  return snippets;
+}
+
+function CodeToken({ token }: { token: Token }) {
   const classNames = [
     styles.token,
     token.className ? styles[token.className] : styles.plain,
-    token.highlight ? styles.highlightWord : "",
-    token.highlight && pulseHighlight ? styles.highlightActive : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -287,216 +303,221 @@ function CodeToken({
   return <span className={classNames}>{token.text}</span>;
 }
 
-function TypingLine({ text, startDelay }: { text: string; startDelay: number }) {
-  const prefersReducedMotion = useReducedMotion();
-  const [visible, setVisible] = useState(prefersReducedMotion ? text.length : 0);
+type LifecyclePhase = "waiting" | "fadeIn" | "typing" | "pause" | "fadeOut";
 
-  useEffect(() => {
-    if (prefersReducedMotion) {
-      setVisible(text.length);
-      return;
-    }
-
-    let intervalId = 0;
-    const timeoutId = window.setTimeout(() => {
-      intervalId = window.setInterval(() => {
-        setVisible((current) => {
-          if (current >= text.length) {
-            window.clearInterval(intervalId);
-            return current;
-          }
-          return current + 1;
-        });
-      }, 38);
-    }, startDelay);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      window.clearInterval(intervalId);
-    };
-  }, [prefersReducedMotion, startDelay, text]);
-
-  return <span className={styles.plain}>{text.slice(0, visible)}</span>;
-}
-
-function SnippetParticles({ count = 4 }: { count?: number }) {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: count }, (_, index) => ({
-        id: index,
-        top: `${12 + index * 18}%`,
-        left: `${index % 2 === 0 ? -8 : 92}%`,
-        size: 2 + (index % 2),
-        duration: 3.5 + index * 0.6,
-        delay: index * 0.4,
-      })),
-    [count],
-  );
-
-  return (
-    <>
-      {particles.map((particle) => (
-        <motion.span
-          key={particle.id}
-          className={styles.particle}
-          style={{
-            top: particle.top,
-            left: particle.left,
-            width: particle.size,
-            height: particle.size,
-          }}
-          animate={{
-            opacity: [0.15, 0.55, 0.2],
-            y: [0, -6, 0],
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: particle.delay,
-          }}
-          aria-hidden
-        />
-      ))}
-    </>
-  );
-}
-
-function CodeSnippet({
-  snippet,
+function FloatingSnippet({
+  instance,
   reducedMotion,
+  onCycleComplete,
 }: {
-  snippet: SnippetConfig;
+  instance: SnippetInstance;
   reducedMotion: boolean | null;
+  onCycleComplete: (instanceId: string) => void;
 }) {
-  const [highlightPulse, setHighlightPulse] = useState(false);
-  const typingText =
-    snippet.typingLineIndex !== undefined
-      ? lineToText(snippet.lines[snippet.typingLineIndex] ?? [])
-      : "";
+  const { springX, springY, isPointerFine } = useMouse();
+  const [phase, setPhase] = useState<LifecyclePhase>(
+    reducedMotion ? "pause" : instance.spawnDelay > 0 ? "waiting" : "fadeIn",
+  );
+  const [typedChars, setTypedChars] = useState<Record<number, number>>({});
+
+  const parallaxX = useTransform(springX, (value) => {
+    if (!isPointerFine || reducedMotion) return 0;
+    return (value / window.innerWidth - 0.5) * instance.parallaxFactor * 18;
+  });
+
+  const parallaxY = useTransform(springY, (value) => {
+    if (!isPointerFine || reducedMotion) return 0;
+    return (value / window.innerHeight - 0.5) * instance.parallaxFactor * 14;
+  });
+
+  const typingTargets = useMemo(() => {
+    return instance.template.typingLines.map((lineIndex) => ({
+      lineIndex,
+      text: lineToText(instance.template.lines[lineIndex] ?? []),
+    }));
+  }, [instance.template]);
 
   useEffect(() => {
     if (reducedMotion) return;
 
-    const hasHighlight = snippet.lines.some((line) =>
-      line.some((token) => token.highlight),
+    const timers: number[] = [];
+
+    if (phase === "waiting") {
+      timers.push(
+        window.setTimeout(() => setPhase("fadeIn"), instance.spawnDelay * 1000),
+      );
+    }
+
+    if (phase === "fadeIn") {
+      timers.push(window.setTimeout(() => setPhase("typing"), 700));
+    }
+
+    if (phase === "typing") {
+      let delay = 0;
+      typingTargets.forEach(({ lineIndex, text }) => {
+        for (let char = 1; char <= text.length; char++) {
+          delay += 28 + Math.random() * 18;
+          timers.push(
+            window.setTimeout(() => {
+              setTypedChars((prev) => ({ ...prev, [lineIndex]: char }));
+            }, delay),
+          );
+        }
+        delay += 120;
+      });
+      timers.push(window.setTimeout(() => setPhase("pause"), delay + 200));
+    }
+
+    if (phase === "pause") {
+      timers.push(
+        window.setTimeout(() => setPhase("fadeOut"), 1800 + Math.random() * 1400),
+      );
+    }
+
+    if (phase === "fadeOut") {
+      timers.push(
+        window.setTimeout(() => onCycleComplete(instance.instanceId), 900),
+      );
+    }
+
+    return () => timers.forEach((id) => window.clearTimeout(id));
+  }, [
+    phase,
+    reducedMotion,
+    instance.spawnDelay,
+    instance.instanceId,
+    typingTargets,
+    onCycleComplete,
+  ]);
+
+  const opacity =
+    phase === "waiting"
+      ? 0
+      : phase === "fadeIn"
+        ? instance.baseOpacity
+        : phase === "fadeOut"
+          ? 0
+          : instance.baseOpacity;
+
+  const showCursor =
+    !reducedMotion &&
+    (phase === "typing" || phase === "pause") &&
+    typingTargets.some(
+      ({ lineIndex, text }) => (typedChars[lineIndex] ?? 0) < text.length,
     );
-    if (!hasHighlight) return;
 
-    let timeoutId = 0;
-    const pulse = () => {
-      setHighlightPulse(true);
-      timeoutId = window.setTimeout(() => {
-        setHighlightPulse(false);
-        timeoutId = window.setTimeout(pulse, 4200 + Math.random() * 3000);
-      }, 900);
-    };
-
-    timeoutId = window.setTimeout(pulse, 2000 + snippet.floatDelay * 400);
-    return () => window.clearTimeout(timeoutId);
-  }, [reducedMotion, snippet.floatDelay, snippet.lines]);
-
-  const opacityRange = [
-    snippet.baseOpacity * 0.75,
-    snippet.baseOpacity,
-    snippet.baseOpacity * 0.85,
-    snippet.baseOpacity * 0.95,
-    snippet.baseOpacity * 0.75,
-  ];
+  const activeTypingLine = typingTargets.find(
+    ({ lineIndex, text }) => (typedChars[lineIndex] ?? 0) < text.length,
+  )?.lineIndex;
 
   return (
     <motion.div
-      className={[
-        styles.snippet,
-        snippet.hideBelow === "md" ? styles.hideMd : "",
-        snippet.hideBelow === "sm" ? styles.hideSm : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={styles.parallaxWrap}
       style={{
-        top: snippet.top,
-        left: snippet.left,
-        right: snippet.right,
-        bottom: snippet.bottom,
-        fontSize: snippet.fontSize,
-        filter: `blur(${snippet.blur}px)`,
-        rotate: snippet.rotate,
+        left: `${instance.x}%`,
+        top: `${instance.y}%`,
+        x: parallaxX,
+        y: parallaxY,
       }}
-      initial={{ opacity: 0 }}
-      animate={
-        reducedMotion
-          ? { opacity: snippet.baseOpacity, y: 0 }
-          : {
-              opacity: opacityRange,
-              y: [0, -snippet.driftY, snippet.driftY * 0.35, -snippet.driftY * 0.65, 0],
-            }
-      }
-      transition={
-        reducedMotion
-          ? { duration: 0.6 }
-          : {
-              duration: snippet.floatDuration,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: snippet.floatDelay,
-            }
-      }
       aria-hidden
     >
-      {snippet.particles && <SnippetParticles />}
+      <motion.div
+        className={styles.snippet}
+        style={{
+          rotate: instance.rotate,
+          filter: `blur(${instance.blur}px)`,
+        }}
+        initial={{ opacity: 0 }}
+        animate={
+          reducedMotion
+            ? { opacity: instance.baseOpacity, y: 0 }
+            : {
+                opacity,
+                y: [0, -instance.driftY, instance.driftY * 0.4, -instance.driftY * 0.6, 0],
+              }
+        }
+        transition={
+          reducedMotion
+            ? { duration: 0.5 }
+            : phase === "fadeIn" || phase === "fadeOut"
+              ? { opacity: { duration: phase === "fadeIn" ? 0.7 : 0.9, ease: "easeOut" } }
+              : {
+                  opacity: { duration: 0.6 },
+                  y: {
+                    duration: instance.floatDuration,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                }
+        }
+      >
+      <div className={styles.windowChrome}>
+        <span className={styles.windowDot} />
+        <span className={styles.windowDot} />
+        <span className={styles.windowDot} />
+        <span className={styles.windowLabel}>{instance.template.tech}</span>
+      </div>
 
       <pre className={styles.pre}>
         <code>
-          {snippet.lines.map((line, lineIndex) => (
-            <div key={`${snippet.id}-${lineIndex}`} className={styles.line}>
-              {line.length === 0 ? (
-                "\u00A0"
-              ) : snippet.typingLineIndex === lineIndex ? (
-                <>
-                  <TypingLine
-                    text={typingText}
-                    startDelay={1800 + snippet.floatDelay * 500}
-                  />
-                  {snippet.showCursor && (
-                    <motion.span
-                      className={styles.cursor}
-                      animate={{ opacity: [1, 0, 1] }}
-                      transition={{
-                        duration: 1.05,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                    />
-                  )}
-                </>
-              ) : (
-                line.map((token, tokenIndex) => (
-                  <CodeToken
-                    key={`${snippet.id}-${lineIndex}-${tokenIndex}`}
-                    token={token}
-                    pulseHighlight={highlightPulse}
-                  />
-                ))
-              )}
-              {snippet.showCursor &&
-                snippet.typingLineIndex !== lineIndex &&
-                lineIndex === snippet.lines.length - 1 && (
-                  <motion.span
-                    className={styles.cursor}
-                    animate={{ opacity: [1, 0, 1] }}
-                    transition={{
-                      duration: 1.05,
-                      repeat: Infinity,
-                      ease: "linear",
-                      delay: 0.4,
-                    }}
-                  />
+          {instance.template.lines.map((line, lineIndex) => {
+            const isTypingLine = instance.template.typingLines.includes(lineIndex);
+            const fullText = lineToText(line);
+            const visibleCount = reducedMotion
+              ? fullText.length
+              : isTypingLine
+                ? typedChars[lineIndex] ?? 0
+                : phase === "waiting" || phase === "fadeIn"
+                  ? 0
+                  : fullText.length;
+
+            const showLine =
+              reducedMotion ||
+              !isTypingLine ||
+              visibleCount > 0 ||
+              phase === "pause" ||
+              phase === "fadeOut";
+
+            if (!showLine && line.length === 0) {
+              return (
+                <div key={lineIndex} className={styles.line}>
+                  {"\u00A0"}
+                </div>
+              );
+            }
+
+            if (!showLine) return null;
+
+            return (
+              <div key={lineIndex} className={styles.line}>
+                {line.length === 0 ? (
+                  "\u00A0"
+                ) : isTypingLine ? (
+                  <>
+                    <span className={styles.plain}>{fullText.slice(0, visibleCount)}</span>
+                    {showCursor && activeTypingLine === lineIndex && (
+                      <motion.span
+                        className={styles.cursor}
+                        animate={{ opacity: [1, 0, 1] }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  line.map((token, tokenIndex) => (
+                    <CodeToken key={tokenIndex} token={token} />
+                  ))
                 )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </code>
       </pre>
+      </motion.div>
     </motion.div>
   );
 }
@@ -506,16 +527,70 @@ export default function HeroCodeBackground({
 }: {
   reducedMotion: boolean | null;
 }) {
+  const [mounted, setMounted] = useState(false);
+  const [snippets, setSnippets] = useState<SnippetInstance[]>([]);
+
+  useEffect(() => {
+    const resolveCount = () =>
+      window.innerWidth < 640 ? 3 : window.innerWidth < 900 ? 4 : MAX_SNIPPETS;
+
+    const syncSnippets = () => {
+      const nextCount = resolveCount();
+      setSnippets((prev) => {
+        if (prev.length === 0) {
+          return createInitialSnippets(nextCount);
+        }
+        if (prev.length === nextCount) return prev;
+        if (prev.length < nextCount) {
+          const occupied = prev.map((s) => ({ x: s.x, y: s.y }));
+          const usedTemplates = prev.map((s) => s.template.id);
+          const added = Array.from({ length: nextCount - prev.length }, (_, i) => {
+            const instance = createSnippetInstance(occupied, usedTemplates, i * 0.6);
+            occupied.push({ x: instance.x, y: instance.y });
+            usedTemplates.push(instance.template.id);
+            return instance;
+          });
+          return [...prev, ...added];
+        }
+        return prev.slice(0, nextCount);
+      });
+    };
+
+    syncSnippets();
+    setMounted(true);
+    window.addEventListener("resize", syncSnippets);
+    return () => window.removeEventListener("resize", syncSnippets);
+  }, []);
+
+  const handleCycleComplete = useCallback((instanceId: string) => {
+    setSnippets((prev) => {
+      const occupied = prev
+        .filter((s) => s.instanceId !== instanceId)
+        .map((s) => ({ x: s.x, y: s.y }));
+      const usedTemplates = prev
+        .filter((s) => s.instanceId !== instanceId)
+        .map((s) => s.template.id);
+
+      return prev.map((snippet) =>
+        snippet.instanceId === instanceId
+          ? createSnippetInstance(occupied, usedTemplates, 0.2)
+          : snippet,
+      );
+    });
+  }, []);
+
   return (
     <div className={styles.layer} aria-hidden>
       <div className={styles.contentMask} />
-      {CODE_SNIPPETS.map((snippet) => (
-        <CodeSnippet
-          key={snippet.id}
-          snippet={snippet}
-          reducedMotion={reducedMotion}
-        />
-      ))}
+      {mounted &&
+        snippets.map((snippet) => (
+          <FloatingSnippet
+            key={snippet.instanceId}
+            instance={snippet}
+            reducedMotion={reducedMotion}
+            onCycleComplete={handleCycleComplete}
+          />
+        ))}
     </div>
   );
 }

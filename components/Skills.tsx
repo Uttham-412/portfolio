@@ -12,40 +12,34 @@ import SectionReveal, { RevealItem } from "@/components/ui/SectionReveal";
 
 const skillCategories = [
   {
-    title: "Programming",
-    skills: ["Python", "C++", "JavaScript", "Java"],
+    title: "Languages",
+    skills: ["Python", "JavaScript", "Java"],
     span: 1,
   },
   {
     title: "Frontend",
-    skills: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
+    skills: ["React", "HTML", "CSS"],
     span: 1,
   },
   {
     title: "Backend",
-    skills: ["Node.js", "Express", "FastAPI", "Django"],
+    skills: ["Node.js", "FastAPI", "REST APIs"],
     span: 1,
   },
   {
-    title: "AI & Machine Learning",
-    skills: [
-      "PyTorch",
-      "TensorFlow",
-      "Scikit-learn",
-      "LangChain",
-      "HuggingFace",
-    ],
+    title: "AI",
+    skills: ["NLP", "Deep Learning", "Generative AI"],
     span: 2,
     large: true,
   },
   {
-    title: "Databases",
-    skills: ["PostgreSQL", "MongoDB", "Pinecone", "Redis"],
+    title: "Database",
+    skills: ["MongoDB", "SQL"],
     span: 1,
   },
   {
     title: "Tools",
-    skills: ["Docker", "Git", "AWS", "Linux"],
+    skills: ["Git", "GitHub", "Postman"],
     span: 1,
   },
 ];

@@ -45,77 +45,74 @@ const headerVariants: Variants = {
 
 const projects = [
   {
-    name: "CareerPath",
-    badge: "AI & Career Mapping",
+    name: "CareerPath AI",
+    tagline: "AI-powered career recommendation platform.",
+    badge: "Featured Project",
     badgeVariant: "ai" as const,
     description:
-      "AI-driven career trajectory mapping. An LLM-powered platform that analyzes industry trends and skills to define long-term professional growth paths.",
-    problem:
-      "Generic job boards lack future-proofing guidance, leaving users stagnant.",
-    solution:
-      "Intelligent mapping that predicts future role requirements based on current skills.",
+      "Analyzes resumes using NLP, identifies skill gaps, and recommends personalized career paths.",
     features: [
-      "LLM-powered career trajectory mapping",
-      "Real-time industry trend analysis",
-      "Skills-to-role requirement prediction",
-      "Personalized long-term growth paths",
+      "Resume Parsing",
+      "Skill Gap Analysis",
+      "AI Recommendations",
+      "Personalized Career Paths",
     ],
-    stack: ["Next.js", "OpenAI", "PostgreSQL", "Tailwind CSS"],
+    stack: [
+      "React",
+      "FastAPI",
+      "Python",
+      "NLP",
+      "Machine Learning",
+      "MongoDB",
+    ],
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBgzTfwDpP3Y-4eV8AqwCT2L88d3vA8WnpyPCiBOZdQjAis1kyY_7Y7MX-oelIzVvWz5vjzwxcTxrVeXVVgfTPn1TspW3IIwOZYriW_z8KtC2qeCdisK8vxnngOVhgilHIHFs8i8PPRduFieCjVVbJ2kfzS5zpbkbMlSWjMbQ4Uw-g3d1GLTvAAe79d3s90-HMtLvQZolwNIcFRmgiUkzf43E9by7_CE6ekFGNIMRdtzXIxJvTZWaQKFLNPbO8I8RoM9Qle8dw7Cbo",
-    alt: "CareerPath Interface",
+    alt: "CareerPath AI platform interface",
     reversed: false,
+    featured: true,
     demoUrl: "#",
     githubUrl: "#",
   },
   {
-    name: "Wildfire Monitor",
-    badge: "Safety & IoT",
+    name: "Digital Twin Wildfire Detection",
+    badge: "AI • Computer Vision • Deep Learning",
     badgeVariant: "safety" as const,
     description:
-      "Real-time 3D monitoring for forest safety. A digital twin dashboard integrating satellite and sensor data for predictive wildfire modeling.",
-    problem:
-      "Delayed response times due to legacy reporting systems costing lives and acres.",
-    solution:
-      "Sub-second sensor latency combined with 3D terrain visualization for immediate action.",
+      "An AI-powered wildfire detection system that uses satellite imagery and deep learning to detect and predict wildfire spread in real time.",
     features: [
-      "Real-time 3D terrain visualization",
-      "Satellite and sensor data integration",
-      "Sub-second sensor latency alerts",
-      "Predictive wildfire modeling engine",
+      "Wildfire Detection",
+      "Satellite Image Analysis",
+      "Fire Spread Prediction",
+      "Real-time Monitoring",
     ],
-    stack: ["Python", "WebGL", "IoT / Edge", "FastAPI"],
+    stack: ["Python", "TensorFlow", "OpenCV", "U-Net", "Deep Learning"],
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAMErynLrh_Q3Un1oGj8rip_g6KlTom_aRYkaEOT5FOjq0fN-Whr25vzRnax9pVZUTSCHpkBcmH0yR6ffmR2zz7lFgYmy4jfF8tNVSQ31lEngF9PJdIjYiYssna8gfd5nQIoEhBk_VT2MqJEq0Cbw4xNY9c1gJujj4t0qqAWSoxEa5r8cqsDEWIEZKwHYQKCoz4XC2_bilJ6MnHNv-PU6yD-4UYi4Jh7pQ6shKdnBBWGH3z8ONZm4i8seFwCZSJKhdCMVZn_H9fLoo",
-    alt: "Forest Digital Twin Dashboard",
+    alt: "Digital Twin Wildfire Detection dashboard",
     reversed: true,
     muted: true,
-    demoUrl: "#",
-    githubUrl: "#",
+    primaryAction: { label: "GitHub", href: "#", icon: "code" },
+    secondaryAction: { label: "Research", href: "#", icon: "science" },
   },
   {
-    name: "CollabBoard",
-    badge: "Real-time Collaboration",
+    name: "Whiteboard",
+    badge: "Full Stack • Real-Time Collaboration",
     badgeVariant: "collab" as const,
     description:
-      "Minimalist real-time brainstorming tool. A high-performance, low-latency collaboration tool with proprietary vector rendering.",
-    problem:
-      "Existing tools are bloated and slow down the creative flow during live sessions.",
-    solution:
-      "A custom-built Canvas engine providing 60fps interaction regardless of node count.",
+      "A collaborative online whiteboard that enables multiple users to draw, brainstorm, and collaborate together in real time.",
     features: [
-      "60fps proprietary canvas engine",
-      "Real-time WebSocket synchronization",
-      "Minimalist live brainstorming UX",
-      "Scalable vector rendering pipeline",
+      "Live Collaboration",
+      "Shared Whiteboard",
+      "Real-time Drawing Sync",
+      "Responsive Design",
     ],
-    stack: ["React", "WebSockets", "Canvas API", "Node.js"],
+    stack: ["React", "Node.js", "Socket.IO", "MongoDB"],
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAe_R4F0C3-mhhCHT5VUPV_hdklhsgnYG-2bPNK6pTUY4rJ3R8QLOBDDRzJmTdYVqQgzxtpmYtVJ8C8iia2fonAszELkdLllxQaG5n4aeoeI0XWs7r8SB76hHf5kgDiv5ROlJNHIVbT9Y0YAM63-zoM4G002iF0O6Aj_a6vr7wnStGnUvsNjXlSQZNt8l2xGMCSOmikqfYKuuZ-J3N95sjGDN1Xfm7Z6LVUUImng3ODl_OG7sIgs0dvymxkVsTLYOv1vmVtxyJ-5Es",
-    alt: "Whiteboard Collaboration Tool",
+    alt: "Collaborative online whiteboard interface",
     reversed: false,
-    demoUrl: "#",
-    githubUrl: "#",
+    primaryAction: { label: "GitHub", href: "#", icon: "code" },
+    secondaryAction: { label: "Live Demo", href: "#", icon: "open_in_new" },
   },
 ];
 
@@ -183,7 +180,7 @@ function CaseStudy({
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   className={styles.image}
-                  priority={project.name === "CareerPath"}
+                  priority={project.featured === true}
                 />
               </div>
             </TiltCard>
@@ -213,18 +210,27 @@ function CaseStudy({
 
             <h3 className={styles.projectName}>{project.name}</h3>
 
+            {"tagline" in project && project.tagline ? (
+              <p className={styles.tagline}>{project.tagline}</p>
+            ) : null}
+
             <p className={styles.overview}>{project.description}</p>
 
-            <div className={styles.detailGrid}>
-              <div className={styles.detailBlock}>
-                <span className={styles.detailLabel}>Problem</span>
-                <p className={styles.detailText}>{project.problem}</p>
+            {"problem" in project &&
+            typeof project.problem === "string" &&
+            "solution" in project &&
+            typeof project.solution === "string" ? (
+              <div className={styles.detailGrid}>
+                <div className={styles.detailBlock}>
+                  <span className={styles.detailLabel}>Problem</span>
+                  <p className={styles.detailText}>{project.problem}</p>
+                </div>
+                <div className={styles.detailBlock}>
+                  <span className={styles.detailLabel}>Solution</span>
+                  <p className={styles.detailText}>{project.solution}</p>
+                </div>
               </div>
-              <div className={styles.detailBlock}>
-                <span className={styles.detailLabel}>Solution</span>
-                <p className={styles.detailText}>{project.solution}</p>
-              </div>
-            </div>
+            ) : null}
 
             <div>
               <span className={styles.blockTitle}>Technology Stack</span>
@@ -290,24 +296,43 @@ function CaseStudy({
             </div>
 
             <div className={styles.actions}>
-              <MagneticButton href={project.demoUrl} className={styles.btnPrimary}>
+              <MagneticButton
+                href={
+                  "primaryAction" in project && project.primaryAction
+                    ? project.primaryAction.href
+                    : project.demoUrl
+                }
+                className={styles.btnPrimary}
+              >
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
                 >
-                  open_in_new
+                  {"primaryAction" in project && project.primaryAction
+                    ? project.primaryAction.icon
+                    : "open_in_new"}
                 </span>
-                Live Demo
+                {"primaryAction" in project && project.primaryAction
+                  ? project.primaryAction.label
+                  : "Live Demo"}
               </MagneticButton>
               <MagneticButton
-                href={project.githubUrl}
+                href={
+                  "secondaryAction" in project && project.secondaryAction
+                    ? project.secondaryAction.href
+                    : project.githubUrl
+                }
                 className={styles.btnSecondary}
               >
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
                 >
-                  code
+                  {"secondaryAction" in project && project.secondaryAction
+                    ? project.secondaryAction.icon
+                    : "code"}
                 </span>
-                GitHub
+                {"secondaryAction" in project && project.secondaryAction
+                  ? project.secondaryAction.label
+                  : "GitHub"}
               </MagneticButton>
             </div>
           </motion.div>

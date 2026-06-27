@@ -15,9 +15,10 @@ import styles from "./About.module.css";
 const techStack = ["Python", "React", "PyTorch", "Node.js", "Docker"];
 
 const stats = [
-  { target: 15, icon: "rocket_launch", label: "Projects Completed" },
-  { target: 2, icon: "work", label: "Internships" },
-  { target: 8, icon: "trophy", label: "Hackathons Won" },
+  { target: 8.28, icon: "school", label: "CGPA", kind: "decimal" as const },
+  { target: 4, icon: "rocket_launch", label: "Projects", kind: "counter" as const, suffix: "+" },
+  { target: 1, icon: "work", label: "Internship", kind: "counter" as const },
+  { target: 2027, icon: "history_edu", label: "Graduation", kind: "counter" as const },
 ];
 
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
@@ -61,11 +62,16 @@ const statContainerVariants: Variants = {
   },
 };
 
-function useAnimatedStat(target: number) {
+function useAnimatedStat(
+  target: number,
+  kind: "counter" | "decimal",
+  suffix = "",
+) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.35 });
   const [value, setValue] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+  const startValue = kind === "counter" && target > 100 ? target - 30 : 0;
 
   useEffect(() => {
     if (!isInView) return;
@@ -75,31 +81,51 @@ function useAnimatedStat(target: number) {
       return;
     }
 
-    const controls = animate(0, target, {
-      duration: 2.2,
+    const controls = animate(startValue, target, {
+      duration: kind === "decimal" ? 2.4 : target > 100 ? 1.8 : 2.2,
       ease: EASE,
-      onUpdate: (latest) => setValue(Math.round(latest)),
+      onUpdate: (latest) => setValue(latest),
     });
 
     return () => controls.stop();
-  }, [isInView, target, prefersReducedMotion]);
+  }, [isInView, target, prefersReducedMotion, kind, startValue]);
 
   const display =
-    value >= target && target >= 5 ? `${target}+` : String(value);
+    kind === "decimal"
+      ? value.toFixed(2)
+      : value >= target
+        ? `${target}${suffix}`
+        : String(Math.round(value));
 
   return { ref, display };
 }
 
-function StatCard({
-  target,
+function StatCard({ stat }: { stat: (typeof stats)[number] }) {
+  return (
+    <AnimatedStatCard
+      icon={stat.icon}
+      label={stat.label}
+      target={stat.target}
+      kind={stat.kind}
+      suffix={stat.suffix ?? ""}
+    />
+  );
+}
+
+function AnimatedStatCard({
   icon,
   label,
+  target,
+  kind,
+  suffix,
 }: {
-  target: number;
   icon: string;
   label: string;
+  target: number;
+  kind: "counter" | "decimal";
+  suffix: string;
 }) {
-  const { ref, display } = useAnimatedStat(target);
+  const { ref, display } = useAnimatedStat(target, kind, suffix);
 
   return (
     <TiltCard
@@ -112,9 +138,11 @@ function StatCard({
           {icon}
         </span>
       </div>
-      <span ref={ref} className={styles.statNumber}>
-        {display}
-      </span>
+      <div className={styles.statNumberSlot}>
+        <span ref={ref} className={styles.statNumber}>
+          {display}
+        </span>
+      </div>
       <p className={styles.statLabel}>{label}</p>
     </TiltCard>
   );
@@ -150,12 +178,9 @@ export default function About() {
                 </h2>
               </div>
               <p className={styles.introText}>
-                I am a third-year{" "}
-                <span className={styles.introHighlight}>
-                  Artificial Intelligence &amp; Machine Learning
-                </span>{" "}
-                student passionate about building AI-powered applications,
-                full-stack software, and automation tools.
+                <span className={styles.introHighlight}>Full Stack Developer</span>{" "}
+                passionate about building AI-powered web applications with clean UI,
+                scalable backend systems, and modern technologies.
               </p>
             </motion.div>
 
@@ -187,10 +212,6 @@ export default function About() {
                       <span className={styles.degreeLabel}>
                         B.E. in AI &amp; Machine Learning
                       </span>
-                      <div className={styles.cgpaRow}>
-                        <span className={styles.cgpaDot} />
-                        <span className={styles.cgpaValue}>CGPA: 8.28</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -252,7 +273,7 @@ export default function About() {
           animate={isInView ? "visible" : "hidden"}
         >
           {stats.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
+            <StatCard key={stat.label} stat={stat} />
           ))}
         </motion.div>
       </div>

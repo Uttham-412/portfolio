@@ -219,6 +219,17 @@
   max-width: 36rem;
 }
 
+.tagline {
+  margin-top: -0.5rem;
+  font-family: var(--font-body-lg);
+  font-size: clamp(1.0625rem, 2vw, 1.25rem);
+  line-height: 1.55;
+  font-weight: 500;
+  color: var(--color-primary);
+  opacity: 0.88;
+  max-width: 36rem;
+}
+
 .detailGrid {
   display: grid;
   grid-template-columns: 1fr;

@@ -6,13 +6,9 @@ import {
   type Transition,
   type Variants,
 } from "framer-motion";
-import Image from "next/image";
 import HeroCodeBackground from "@/components/HeroCodeBackground";
 import MagneticButton from "@/components/ui/MagneticButton";
 import styles from "./Hero.module.css";
-
-const PROFILE_IMAGE =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBDWzwNygYjOi-JQfm4nIXBVphiJhlHUVgcju_vpg4cthB_twAK3XqOvGj95peRFhhfBTZyJMDjPwE9EE26e3p3sWExsjSdMG2-rh08lNlFNr5bFmHWxi3o_FsLWIbblCHwm0UfcYb4i5K43skyREpcjrgq6CzH1eE9HfWZ0YIUEA4zp80P8TEidFlMNrcOUcIDwVtw7K-yd9KjwhT8sbCgoNGTCmkgvWom2-y1RXr-mK0noD1k0lQm-QZ4AJupteCZ2yWammtRfAs";
 
 const EASE: Transition["ease"] = [0.16, 1, 0.3, 1];
 
@@ -109,8 +105,9 @@ const actionsVariants: Variants = {
 const TITLE_WORDS = ["Uttham", "Poojary"];
 
 const DESCRIPTION_LINES = [
-  "Building intelligent software, AI-powered applications,",
-  "and scalable digital experiences with precision and architectural excellence.",
+  "Building modern full-stack applications powered by Artificial Intelligence.",
+  "I build scalable web applications using React, FastAPI, Node.js, and AI technologies.",
+  "I enjoy solving real-world problems through intelligent software, modern user experiences, and clean engineering.",
 ];
 
 export default function Hero() {
@@ -250,23 +247,32 @@ export default function Hero() {
                 aria-hidden
               />
               <div className={styles.profileInner}>
-                <Image
-                  src={PROFILE_IMAGE}
-                  alt="Uttham Poojary — professional portrait"
-                  fill
-                  className="object-cover grayscale contrast-[1.1] brightness-90 hover:grayscale-0 transition-all duration-700 ease-in-out"
-                  priority
-                  sizes="(max-width: 768px) 120px, 176px"
-                />
+                <div className={styles.profilePlaceholder} aria-label="Profile photo placeholder">
+                  <svg
+                    className={styles.profilePlaceholderIcon}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <circle cx="12" cy="8.5" r="3.5" stroke="currentColor" strokeWidth="1.25" />
+                    <path
+                      d="M5 19.5c0-3.038 3.134-5.5 7-5.5s7 2.462 7 5.5"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className={styles.profilePlaceholderLabel}>Your photo</span>
+                </div>
               </div>
             </div>
           </motion.div>
         </motion.div>
 
         <motion.p className={styles.eyebrow} variants={revealVariants}>
-          AI &amp; Machine Learning Engineer
-          <span className="hidden sm:inline"> · </span>
-          <span className="block sm:inline">Full Stack Developer</span>
+          Full Stack Developer
+          <span className="hidden sm:inline"> | </span>
+          <span className="block sm:inline">AI &amp; Machine Learning Engineer</span>
         </motion.p>
 
         <h1 className={styles.title} aria-label="Uttham Poojary">
@@ -310,10 +316,10 @@ export default function Hero() {
                   }
             }
           >
-            View Projects
+            View My Work
           </MagneticButton>
           <MagneticButton href="#contact" className={styles.ctaSecondary}>
-            Contact Me
+            Let&apos;s Connect
           </MagneticButton>
         </motion.div>
       </motion.div>
