@@ -70,8 +70,8 @@ const projects = [
     alt: "CareerPath AI platform interface",
     reversed: false,
     featured: true,
-    demoUrl: "#",
-    githubUrl: "#",
+    demoUrl: "https://educareer-web.onrender.com",
+    githubUrl: "https://github.com/Uttham-412/educareer.git",
   },
   {
     name: "Digital Twin Wildfire Detection",
@@ -111,8 +111,8 @@ const projects = [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAe_R4F0C3-mhhCHT5VUPV_hdklhsgnYG-2bPNK6pTUY4rJ3R8QLOBDDRzJmTdYVqQgzxtpmYtVJ8C8iia2fonAszELkdLllxQaG5n4aeoeI0XWs7r8SB76hHf5kgDiv5ROlJNHIVbT9Y0YAM63-zoM4G002iF0O6Aj_a6vr7wnStGnUvsNjXlSQZNt8l2xGMCSOmikqfYKuuZ-J3N95sjGDN1Xfm7Z6LVUUImng3ODl_OG7sIgs0dvymxkVsTLYOv1vmVtxyJ-5Es",
     alt: "Collaborative online whiteboard interface",
     reversed: false,
-    primaryAction: { label: "GitHub", href: "#", icon: "code" },
-    secondaryAction: { label: "Live Demo", href: "#", icon: "open_in_new" },
+    primaryAction: { label: "GitHub", href: "https://github.com/Uttham-412/Whiteboard.git", icon: "code" },
+    secondaryAction: { label: "Live Demo", href: "https://whiteboard-2-6qxi.onrender.com", icon: "open_in_new" },
   },
 ];
 
@@ -307,6 +307,8 @@ function CaseStudy({
                     : project.demoUrl
                 }
                 className={styles.btnPrimary}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
@@ -326,6 +328,8 @@ function CaseStudy({
                     : project.githubUrl
                 }
                 className={styles.btnSecondary}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span
                   className={`material-symbols-outlined ${styles.btnIcon}`}
