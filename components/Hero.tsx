@@ -114,46 +114,7 @@ export default function Hero() {
   // Treat mobile same as reduced-motion for expensive infinite animations
   const skipAnimation = prefersReducedMotion || isMobile;
 
-  const floatTransition = skipAnimation
-    ? undefined
-    : {
-        duration: 7,
-        repeat: Infinity,
-        ease: "easeInOut" as const,
-      };
 
-  const orbitTransition = skipAnimation
-    ? undefined
-    : {
-        duration: 24,
-        repeat: Infinity,
-        ease: "linear" as const,
-      };
-
-  const borderSpinTransition = skipAnimation
-    ? undefined
-    : {
-        duration: 5,
-        repeat: Infinity,
-        ease: "linear" as const,
-      };
-
-  const scrollDotTransition = skipAnimation
-    ? undefined
-    : {
-        duration: 2.4,
-        repeat: Infinity,
-        ease: [0.45, 0, 0.55, 1] as const,
-        times: [0, 0.12, 0.88, 1],
-      };
-
-  const scrollPulseTransition = skipAnimation
-    ? undefined
-    : {
-        duration: 2.4,
-        repeat: Infinity,
-        ease: "easeInOut" as const,
-      };
 
   return (
     <motion.section
@@ -172,10 +133,11 @@ export default function Hero() {
         animate="visible"
       >
         <motion.div className={styles.profileBlock} variants={profileVariants}>
-          <motion.div
+          <div
             className={styles.orbitRing}
-            animate={skipAnimation ? undefined : { rotate: 360 }}
-            transition={orbitTransition}
+            style={{
+              transform: skipAnimation ? undefined : "rotate(var(--orbit-ring-rotate))",
+            }}
             aria-hidden
           >
             <svg viewBox="0 0 200 200" className={styles.orbitSvg}>
@@ -197,54 +159,38 @@ export default function Hero() {
                 </linearGradient>
               </defs>
             </svg>
-          </motion.div>
+          </div>
 
-          <motion.div
+          <div
             className={styles.profileFloat}
-            animate={
-              skipAnimation
+            style={{
+              transform: skipAnimation
                 ? undefined
-                : {
-                    y: [0, -11, -3, -13, 0],
-                    rotate: [0, 0.6, -0.4, 0.5, 0],
-                  }
-            }
-            transition={floatTransition}
+                : "translate3d(0, var(--profile-float-y), 0) rotate(var(--profile-float-rotate))",
+            }}
           >
-            <motion.div
+            <div
               className={styles.profileGlow}
-              animate={
-                skipAnimation
-                  ? undefined
-                  : { opacity: [0.55, 1, 0.6, 0.95, 0.55], scale: [1, 1.08, 1.02, 1.06, 1] }
-              }
-              transition={
-                skipAnimation
-                  ? undefined
-                  : { duration: 7, repeat: Infinity, ease: "easeInOut" }
-              }
+              style={{
+                opacity: skipAnimation ? undefined : "var(--profile-glow-opacity)",
+                transform: skipAnimation ? undefined : "scale(var(--profile-glow-scale))",
+              }}
               aria-hidden
             />
 
             <div className={styles.profileRing}>
-              <motion.div
+              <div
                 className={styles.profileBorderSpin}
-                animate={skipAnimation ? undefined : { rotate: 360 }}
-                transition={borderSpinTransition}
+                style={{
+                  transform: skipAnimation ? undefined : "rotate(var(--profile-border-spin-rotate))",
+                }}
                 aria-hidden
               />
-              <motion.div
+              <div
                 className={styles.profileBorderGlow}
-                animate={
-                  skipAnimation
-                    ? undefined
-                    : { opacity: [0.4, 0.85, 0.5, 0.75, 0.4] }
-                }
-                transition={
-                  skipAnimation
-                    ? undefined
-                    : { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                }
+                style={{
+                  opacity: skipAnimation ? undefined : "var(--profile-border-glow-opacity)",
+                }}
                 aria-hidden
               />
               <div className={styles.profileInner}>
@@ -258,7 +204,7 @@ export default function Hero() {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
 
         <motion.p className={styles.eyebrow} variants={revealVariants}>
@@ -325,14 +271,11 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, duration: 0.85, ease: EASE }}
       >
-        <motion.span
+        <span
           className={styles.scrollChevron}
-          animate={skipAnimation ? undefined : { y: [0, 5, 0] }}
-          transition={
-            skipAnimation
-              ? undefined
-              : { duration: 2, repeat: Infinity, ease: "easeInOut" }
-          }
+          style={{
+            transform: skipAnimation ? undefined : "translate3d(0, var(--scroll-chevron-y), 0)",
+          }}
           aria-hidden
         >
           <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
@@ -344,27 +287,23 @@ export default function Hero() {
               strokeLinejoin="round"
             />
           </svg>
-        </motion.span>
+        </span>
         <span className={styles.scrollLabel}>Explore</span>
         <div className={styles.scrollTrack}>
-          <motion.span
+          <span
             className={styles.scrollPulse}
-            animate={
-              skipAnimation
-                ? undefined
-                : { scaleY: [0, 1, 0], opacity: [0, 0.5, 0], y: [0, 0, 0] }
-            }
-            transition={scrollPulseTransition}
+            style={{
+              transform: skipAnimation ? undefined : "scaleY(var(--scroll-pulse-scale-y))",
+              opacity: skipAnimation ? undefined : "var(--scroll-pulse-opacity)",
+            }}
             aria-hidden
           />
-          <motion.span
+          <span
             className={styles.scrollDot}
-            animate={
-              skipAnimation
-                ? undefined
-                : { y: [0, 52, 0], opacity: [0, 1, 1, 0] }
-            }
-            transition={scrollDotTransition}
+            style={{
+              transform: skipAnimation ? undefined : "translate3d(0, var(--scroll-dot-y), 0)",
+              opacity: skipAnimation ? undefined : "var(--scroll-dot-opacity)",
+            }}
             aria-hidden
           />
         </div>

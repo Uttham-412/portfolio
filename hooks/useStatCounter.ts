@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { globalAnimationEngine } from "@/lib/animationEngine";
 
 export function useStatCounter(target: number) {
   const ref = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState(0);
   const animated = useRef(false);
+  const counterId = useRef(`counter-${Math.random().toString(36).slice(2, 9)}`);
 
   useEffect(() => {
     const el = ref.current;
@@ -14,29 +16,25 @@ export function useStatCounter(target: number) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !animated.current) {
+          if (entry.isIntersecting && !animated.current && globalAnimationEngine) {
             animated.current = true;
             const duration = 2500;
             const startTime = performance.now();
-            let rafId = 0;
 
-            const tick = (now: number) => {
-              const elapsed = Math.min(now - startTime, duration);
+            const tick = () => {
+              const elapsed = Math.min(performance.now() - startTime, duration);
               // Ease-out cubic
               const progress = 1 - Math.pow(1 - elapsed / duration, 3);
               const current = Math.floor(progress * target);
               setValue(current);
-              if (elapsed < duration) {
-                rafId = requestAnimationFrame(tick);
-              } else {
+
+              if (elapsed >= duration) {
                 setValue(target);
+                globalAnimationEngine.unregisterTick(counterId.current);
               }
             };
 
-            rafId = requestAnimationFrame(tick);
-
-            // Cleanup if component unmounts mid-animation
-            return () => cancelAnimationFrame(rafId);
+            globalAnimationEngine.registerTick(counterId.current, tick);
           }
         });
       },
@@ -44,7 +42,12 @@ export function useStatCounter(target: number) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (globalAnimationEngine) {
+        globalAnimationEngine.unregisterTick(counterId.current);
+      }
+    };
   }, [target]);
 
   const display =

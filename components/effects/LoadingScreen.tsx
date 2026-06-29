@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { globalAnimationEngine } from "@/lib/animationEngine";
 import styles from "./LoadingScreen.module.css";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -17,25 +18,28 @@ export default function LoadingScreen() {
       return;
     }
 
+    if (!globalAnimationEngine) return;
+
     const start = performance.now();
     const duration = 1800;
 
-    let frame = 0;
-    const tick = (now: number) => {
-      const elapsed = now - start;
+    const tick = () => {
+      const elapsed = performance.now() - start;
       const next = Math.min(100, (elapsed / duration) * 100);
       setProgress(next);
-      if (elapsed < duration) {
-        frame = requestAnimationFrame(tick);
+      if (elapsed >= duration) {
+        globalAnimationEngine.unregisterTick("loading-screen");
       }
     };
 
-    frame = requestAnimationFrame(tick);
+    globalAnimationEngine.registerTick("loading-screen", tick);
 
     const hideTimer = window.setTimeout(() => setVisible(false), 2100);
 
     return () => {
-      cancelAnimationFrame(frame);
+      if (globalAnimationEngine) {
+        globalAnimationEngine.unregisterTick("loading-screen");
+      }
       window.clearTimeout(hideTimer);
     };
   }, [prefersReducedMotion]);

@@ -5,8 +5,9 @@ import {
   useReducedMotion,
   type HTMLMotionProps,
 } from "framer-motion";
-import { useCallback, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useMouse } from "@/context/MouseContext";
+import { globalAnimationEngine } from "@/lib/animationEngine";
 
 type BaseProps = {
   children: ReactNode;
@@ -18,36 +19,16 @@ function useMagneticHandlers(strength: number) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { isPointerFine } = useMouse();
-  const rafRef = useRef<number>(0);
 
-  const handleMove = useCallback(
-    (event: React.MouseEvent) => {
-      const element = ref.current;
-      if (prefersReducedMotion || !isPointerFine || !element) return;
-      if (rafRef.current) return;
-      const clientX = event.clientX;
-      const clientY = event.clientY;
-      rafRef.current = requestAnimationFrame(() => {
-        const rect = element.getBoundingClientRect();
-        const x = (clientX - rect.left - rect.width / 2) * strength;
-        const y = (clientY - rect.top - rect.height / 2) * strength;
-        element.style.transform = `translate(${x}px, ${y}px)`;
-        rafRef.current = 0;
-      });
-    },
-    [prefersReducedMotion, isPointerFine, strength],
-  );
+  useEffect(() => {
+    const el = ref.current;
+    if (prefersReducedMotion || !isPointerFine || !el || !globalAnimationEngine) return;
 
-  const handleLeave = useCallback(() => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    }
-    if (!ref.current) return;
-    ref.current.style.transform = "";
-  }, []);
+    const deregister = globalAnimationEngine.registerInteractive(el, "magnetic", { strength });
+    return deregister;
+  }, [prefersReducedMotion, isPointerFine, strength]);
 
-  return { ref, handleMove, handleLeave, prefersReducedMotion, isPointerFine };
+  return { ref, prefersReducedMotion, isPointerFine };
 }
 
 type MagneticAnchorProps = BaseProps &
@@ -71,7 +52,7 @@ export default function MagneticButton(props: MagneticButtonProps) {
     ...rest
   } = props;
 
-  const { ref, handleMove, handleLeave, prefersReducedMotion, isPointerFine } =
+  const { ref, prefersReducedMotion, isPointerFine } =
     useMagneticHandlers(strength);
 
   if (as === "button") {
@@ -80,8 +61,6 @@ export default function MagneticButton(props: MagneticButtonProps) {
       <motion.button
         ref={ref as React.Ref<HTMLButtonElement>}
         className={className}
-        onMouseMove={handleMove}
-        onMouseLeave={handleLeave}
         // whileTap spring only fires on pointer-fine devices (desktop)
         whileTap={prefersReducedMotion || !isPointerFine ? undefined : { scale: 0.97 }}
         transition={{ type: "spring", stiffness: 420, damping: 28 }}
@@ -97,8 +76,6 @@ export default function MagneticButton(props: MagneticButtonProps) {
     <motion.a
       ref={ref as React.Ref<HTMLAnchorElement>}
       className={className}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
       whileTap={prefersReducedMotion || !isPointerFine ? undefined : { scale: 0.97 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
       {...anchorProps}

@@ -77,9 +77,8 @@ function ContactDetail({
     </>
   );
 
-  const className = `flex items-center gap-4 group ${
-    item.fullWidth ? "col-span-1 sm:col-span-2" : ""
-  } ${item.href ? "cursor-pointer" : ""}`;
+  const className = `flex items-center gap-4 group ${item.fullWidth ? "col-span-1 sm:col-span-2" : ""
+    } ${item.href ? "cursor-pointer" : ""}`;
 
   if (item.href) {
     return (
@@ -193,16 +192,16 @@ export default function Contact() {
                 ))}
               </div>
 
-              <div className="w-full h-48 rounded-xl overflow-hidden border border-white/10 relative mt-8">
-                <Image
-                  src={MAP_IMAGE}
-                  alt="Map of Mangalore, Karnataka, India"
-                  fill
-                  className="object-cover grayscale opacity-50"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-              </div>
+              <a href="https://maps.app.goo.gl/MC3zFEc1Wwm6kVt8A" target="_blank" rel="noopener noreferrer" className="block w-full h-full group hover:scale-[1.02] transition-transform duration-300">
+                <div className="w-full h-48 rounded-xl overflow-hidden border border-white/10 relative mt-8">
+                  <Image src="/location-map.png" alt="Location map" fill style={{ objectFit: "cover" }} className="object-cover filter transition-all duration-300 group-hover:brightness-110" />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <span className="material-symbols-outlined text-primary text-4xl animate-pulse absolute bottom-4 right-4">location_on</span>
+                  <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-white font-medium bg-black/50 px-2 py-1 rounded">Open in Google Maps →</span>
+                  </div>
+                </div>
+              </a>
             </div>
           </RevealItem>
         </SectionReveal>

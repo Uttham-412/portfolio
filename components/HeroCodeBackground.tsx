@@ -1,8 +1,6 @@
 "use client";
 
-import { motion, useTransform } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useMouse } from "@/context/MouseContext";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import styles from "./HeroCodeBackground.module.css";
 
@@ -307,6 +305,9 @@ function CodeToken({ token }: { token: Token }) {
 
 type LifecyclePhase = "waiting" | "fadeIn" | "typing" | "pause" | "fadeOut";
 
+import { useRef } from "react";
+import { globalAnimationEngine, type SnippetLine } from "@/lib/animationEngine";
+
 function FloatingSnippet({
   instance,
   reducedMotion,
@@ -318,220 +319,124 @@ function FloatingSnippet({
   isMobile: boolean;
   onCycleComplete: (instanceId: string) => void;
 }) {
-  const { springX, springY, isPointerFine } = useMouse();
-  const [phase, setPhase] = useState<LifecyclePhase>(
-    reducedMotion ? "pause" : instance.spawnDelay > 0 ? "waiting" : "fadeIn",
-  );
-  const [typedChars, setTypedChars] = useState<Record<number, number>>({});
-
-  // Parallax is pointer-only — returns 0 on mobile/touch automatically
-  const parallaxX = useTransform(springX, (value) => {
-    if (!isPointerFine || reducedMotion || isMobile) return 0;
-    return (value / window.innerWidth - 0.5) * instance.parallaxFactor * 18;
-  });
-
-  const parallaxY = useTransform(springY, (value) => {
-    if (!isPointerFine || reducedMotion || isMobile) return 0;
-    return (value / window.innerHeight - 0.5) * instance.parallaxFactor * 14;
-  });
-
-  const typingTargets = useMemo(() => {
-    return instance.template.typingLines.map((lineIndex) => ({
-      lineIndex,
-      text: lineToText(instance.template.lines[lineIndex] ?? []),
-    }));
-  }, [instance.template]);
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const lineRefs = useRef<Record<number, HTMLSpanElement | null>>({});
+  const cursorRefs = useRef<Record<number, HTMLSpanElement | null>>({});
 
   useEffect(() => {
-    // On mobile skip the full typing lifecycle — just fade in and stay static.
-    // This eliminates dozens of setTimeout calls per snippet.
-    if (reducedMotion || isMobile) return;
+    const outerEl = outerRef.current;
+    const innerEl = innerRef.current;
+    if (reducedMotion || isMobile || !outerEl || !innerEl || !globalAnimationEngine) return;
 
-    const timers: number[] = [];
+    const snippetLines: SnippetLine[] = instance.template.lines.map((line, lineIndex) => {
+      const isTyping = instance.template.typingLines.includes(lineIndex);
+      return {
+        lineIndex,
+        el: lineRefs.current[lineIndex] as HTMLElement,
+        cursorEl: cursorRefs.current[lineIndex],
+        fullText: lineToText(line),
+        isTyping,
+      };
+    });
 
-    if (phase === "waiting") {
-      timers.push(
-        window.setTimeout(() => setPhase("fadeIn"), instance.spawnDelay * 1000),
-      );
-    }
+    const deregister = globalAnimationEngine.registerSnippet({
+      id: instance.instanceId,
+      outerEl,
+      innerEl,
+      lines: snippetLines,
+      options: {
+        x: instance.x,
+        y: instance.y,
+        rotate: instance.rotate,
+        floatDuration: instance.floatDuration,
+        driftY: instance.driftY,
+        parallaxFactor: instance.parallaxFactor,
+        baseOpacity: instance.baseOpacity,
+        blur: instance.blur,
+        spawnDelay: instance.spawnDelay,
+      },
+      phase: instance.spawnDelay > 0 ? "waiting" : "fadeIn",
+      elapsedTime: 0,
+      pauseDuration: 1.8 + Math.random() * 1.4, // in seconds
+      onCycleComplete: () => {
+        onCycleComplete(instance.instanceId);
+      },
+    });
 
-    if (phase === "fadeIn") {
-      timers.push(window.setTimeout(() => setPhase("typing"), 700));
-    }
-
-    if (phase === "typing") {
-      let delay = 0;
-      typingTargets.forEach(({ lineIndex, text }) => {
-        for (let char = 1; char <= text.length; char++) {
-          delay += 28 + Math.random() * 18;
-          timers.push(
-            window.setTimeout(() => {
-              setTypedChars((prev) => ({ ...prev, [lineIndex]: char }));
-            }, delay),
-          );
-        }
-        delay += 120;
-      });
-      timers.push(window.setTimeout(() => setPhase("pause"), delay + 200));
-    }
-
-    if (phase === "pause") {
-      timers.push(
-        window.setTimeout(() => setPhase("fadeOut"), 1800 + Math.random() * 1400),
-      );
-    }
-
-    if (phase === "fadeOut") {
-      timers.push(
-        window.setTimeout(() => onCycleComplete(instance.instanceId), 900),
-      );
-    }
-
-    return () => timers.forEach((id) => window.clearTimeout(id));
-  }, [
-    phase,
-    reducedMotion,
-    isMobile,
-    instance.spawnDelay,
-    instance.instanceId,
-    typingTargets,
-    onCycleComplete,
-  ]);
-
-  const opacity =
-    phase === "waiting"
-      ? 0
-      : phase === "fadeIn"
-        ? instance.baseOpacity
-        : phase === "fadeOut"
-          ? 0
-          : instance.baseOpacity;
-
-  const showCursor =
-    !reducedMotion &&
-    !isMobile &&
-    (phase === "typing" || phase === "pause") &&
-    typingTargets.some(
-      ({ lineIndex, text }) => (typedChars[lineIndex] ?? 0) < text.length,
-    );
-
-  const activeTypingLine = typingTargets.find(
-    ({ lineIndex, text }) => (typedChars[lineIndex] ?? 0) < text.length,
-  )?.lineIndex;
+    return deregister;
+  }, [instance, reducedMotion, isMobile, onCycleComplete]);
 
   return (
-    <motion.div
+    <div
+      ref={outerRef}
       className={styles.parallaxWrap}
       style={{
         left: `${instance.x}%`,
         top: `${instance.y}%`,
-        x: parallaxX,
-        y: parallaxY,
+        transform: reducedMotion || isMobile ? undefined : `translate3d(0, 0, 0)`,
       }}
       aria-hidden
     >
-      <motion.div
+      <div
+        ref={innerRef}
         className={styles.snippet}
         style={{
-          rotate: instance.rotate,
-          // No blur on mobile — even 0.5px blur creates a stacking context
+          transform: `rotate(${instance.rotate}deg)`,
+          opacity: reducedMotion || isMobile ? instance.baseOpacity : 0,
           filter: !isMobile && instance.blur > 0.5 ? `blur(0.5px)` : undefined,
         }}
-        initial={{ opacity: 0 }}
-        animate={
-          reducedMotion || isMobile
-            ? { opacity: instance.baseOpacity, y: 0 }
-            : {
-                opacity,
-                y: [0, -instance.driftY, instance.driftY * 0.4, -instance.driftY * 0.6, 0],
-              }
-        }
-        transition={
-          reducedMotion || isMobile
-            ? { duration: 0.6, ease: "easeOut" }
-            : phase === "fadeIn" || phase === "fadeOut"
-              ? { opacity: { duration: phase === "fadeIn" ? 0.7 : 0.9, ease: "easeOut" } }
-              : {
-                  opacity: { duration: 0.6 },
-                  y: {
-                    // Slow float down on mobile to reduce compositor work
-                    duration: instance.floatDuration * (isMobile ? 1.8 : 1),
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }
-        }
       >
-      <div className={styles.windowChrome}>
-        <span className={styles.windowDot} />
-        <span className={styles.windowDot} />
-        <span className={styles.windowDot} />
-        <span className={styles.windowLabel}>{instance.template.tech}</span>
-      </div>
+        <div className={styles.windowChrome}>
+          <span className={styles.windowDot} />
+          <span className={styles.windowDot} />
+          <span className={styles.windowDot} />
+          <span className={styles.windowLabel}>{instance.template.tech}</span>
+        </div>
 
-      <pre className={styles.pre}>
-        <code>
-          {instance.template.lines.map((line, lineIndex) => {
-            const isTypingLine = instance.template.typingLines.includes(lineIndex);
-            const fullText = lineToText(line);
-            // On mobile show all text immediately — no character-by-character state
-            const visibleCount = reducedMotion || isMobile
-              ? fullText.length
-              : isTypingLine
-                ? typedChars[lineIndex] ?? 0
-                : phase === "waiting" || phase === "fadeIn"
-                  ? 0
-                  : fullText.length;
+        <pre className={styles.pre}>
+          <code>
+            {instance.template.lines.map((line, lineIndex) => {
+              const isTypingLine = instance.template.typingLines.includes(lineIndex);
+              const fullText = lineToText(line);
+              const showText = reducedMotion || isMobile ? fullText : (isTypingLine ? "" : fullText);
 
-            const showLine =
-              reducedMotion ||
-              isMobile ||
-              !isTypingLine ||
-              visibleCount > 0 ||
-              phase === "pause" ||
-              phase === "fadeOut";
-
-            if (!showLine && line.length === 0) {
               return (
                 <div key={lineIndex} className={styles.line}>
-                  {"\u00A0"}
+                  {line.length === 0 ? (
+                    "\u00A0"
+                  ) : isTypingLine ? (
+                    <>
+                      <span
+                        ref={(el) => {
+                          lineRefs.current[lineIndex] = el;
+                        }}
+                        className={styles.plain}
+                      >
+                        {showText}
+                      </span>
+                      {(!reducedMotion && !isMobile) && (
+                        <span
+                          ref={(el) => {
+                            cursorRefs.current[lineIndex] = el;
+                          }}
+                          className={styles.cursor}
+                          style={{ display: "none" }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    line.map((token, tokenIndex) => (
+                      <CodeToken key={tokenIndex} token={token} />
+                    ))
+                  )}
                 </div>
               );
-            }
-
-            if (!showLine) return null;
-
-            return (
-              <div key={lineIndex} className={styles.line}>
-                {line.length === 0 ? (
-                  "\u00A0"
-                ) : isTypingLine ? (
-                  <>
-                    <span className={styles.plain}>{fullText.slice(0, visibleCount)}</span>
-                    {showCursor && activeTypingLine === lineIndex && (
-                      <motion.span
-                        className={styles.cursor}
-                        animate={{ opacity: [1, 0, 1] }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  line.map((token, tokenIndex) => (
-                    <CodeToken key={tokenIndex} token={token} />
-                  ))
-                )}
-              </div>
-            );
-          })}
-        </code>
-      </pre>
-      </motion.div>
-    </motion.div>
+            })}
+          </code>
+        </pre>
+      </div>
+    </div>
   );
 }
 

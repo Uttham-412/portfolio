@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { globalAnimationEngine } from "@/lib/animationEngine";
 
 export function useScrollNav(sectionIds: string[] = []) {
   const [scrolled, setScrolled] = useState(false);
@@ -8,25 +9,14 @@ export function useScrollNav(sectionIds: string[] = []) {
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
-    let rafId = 0;
+    if (!globalAnimationEngine) return;
 
-    const onScroll = () => {
-      // Throttle scroll handler to one update per animation frame
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => {
-        const offset = window.scrollY;
-        setScrolled(offset > 20);
-        setCompact(offset > 20);
-        rafId = 0;
-      });
-    };
+    const unsubscribe = globalAnimationEngine.registerScrollListener((scrollY) => {
+      setScrolled(scrollY > 20);
+      setCompact(scrollY > 20);
+    });
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
+    return unsubscribe;
   }, []);
 
   useEffect(() => {

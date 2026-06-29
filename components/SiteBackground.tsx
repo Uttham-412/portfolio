@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useMotionTemplate, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { useMouse } from "@/context/MouseContext";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { globalAnimationEngine } from "@/lib/animationEngine";
 import styles from "./SiteBackground.module.css";
 
 type Particle = {
@@ -29,8 +30,6 @@ function FloatingParticles() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    let animationId = 0;
-    let paused = false;
     let particles: Particle[] = [];
 
     const resize = () => {
@@ -50,10 +49,7 @@ function FloatingParticles() {
     };
 
     const draw = () => {
-      if (paused) {
-        animationId = requestAnimationFrame(draw);
-        return;
-      }
+      if (document.hidden) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (const particle of particles) {
@@ -70,15 +66,13 @@ function FloatingParticles() {
         ctx.fillStyle = `rgba(255,255,255,${particle.opacity})`;
         ctx.fill();
       }
-
-      animationId = requestAnimationFrame(draw);
     };
 
-    // Pause when tab is hidden — saves GPU + battery on mobile
-    const handleVisibility = () => {
-      paused = document.hidden;
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
+    resize();
+
+    if (globalAnimationEngine) {
+      globalAnimationEngine.registerTick("particles", draw);
+    }
 
     let resizeTimer = 0;
     const onResize = () => {
@@ -86,14 +80,13 @@ function FloatingParticles() {
       resizeTimer = window.setTimeout(resize, 150);
     };
 
-    resize();
-    draw();
     window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
-      cancelAnimationFrame(animationId);
+      if (globalAnimationEngine) {
+        globalAnimationEngine.unregisterTick("particles");
+      }
       window.removeEventListener("resize", onResize);
-      document.removeEventListener("visibilitychange", handleVisibility);
       clearTimeout(resizeTimer);
     };
   }, [prefersReducedMotion, isMobile]);
@@ -107,22 +100,22 @@ function FloatingParticles() {
 
 function MouseSpotlight() {
   const prefersReducedMotion = useReducedMotion();
-  const { springX, springY, isPointerFine } = useMouse();
-
-  const spotlight = useMotionTemplate`radial-gradient(
-    clamp(420px, 58vw, 760px) circle at ${springX}px ${springY}px,
-    rgba(255, 255, 255, 0.055) 0%,
-    rgba(255, 255, 255, 0.018) 34%,
-    transparent 64%
-  )`;
+  const { isPointerFine } = useMouse();
 
   // isPointerFine=false on mobile — this component simply doesn't render
   if (prefersReducedMotion || !isPointerFine) return null;
 
   return (
-    <motion.div
+    <div
       className={styles.spotlight}
-      style={{ background: spotlight }}
+      style={{
+        background: `radial-gradient(
+          clamp(420px, 58vw, 760px) circle at var(--spring-mouse-x) var(--spring-mouse-y),
+          rgba(255, 255, 255, 0.055) 0%,
+          rgba(255, 255, 255, 0.018) 34%,
+          transparent 64%
+        )`,
+      }}
       aria-hidden
     />
   );

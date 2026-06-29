@@ -1,26 +1,26 @@
 "use client";
 
-import { motion, useMotionTemplate, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { useMouse } from "@/context/MouseContext";
 import styles from "./CursorGlow.module.css";
 
 export default function CursorGlow() {
   const prefersReducedMotion = useReducedMotion();
-  const { springX, springY, isPointerFine } = useMouse();
-
-  const glow = useMotionTemplate`radial-gradient(
-    280px circle at ${springX}px ${springY}px,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(185, 200, 222, 0.03) 35%,
-    transparent 70%
-  )`;
+  const { isPointerFine } = useMouse();
 
   if (prefersReducedMotion || !isPointerFine) return null;
 
   return (
-    <motion.div
+    <div
       className={styles.glow}
-      style={{ background: glow }}
+      style={{
+        background: `radial-gradient(
+          280px circle at var(--spring-mouse-x) var(--spring-mouse-y),
+          rgba(255, 255, 255, 0.07) 0%,
+          rgba(185, 200, 222, 0.03) 35%,
+          transparent 70%
+        )`,
+      }}
       aria-hidden
     />
   );
